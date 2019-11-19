@@ -1,4 +1,4 @@
-module COpenCryptoOpenSSL [system] {
+module CBigNumOpenSSL [system] {
     link "ssl"
     link "crypto"
 }
