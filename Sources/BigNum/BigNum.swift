@@ -15,7 +15,7 @@ public final class BigNum {
         self.ctx = ctx!
     }
 
-    init() {
+    public init() {
         ctx = BN_new()
     }
     
@@ -144,37 +144,37 @@ public extension BigNum {
     }
     
     /// Returns: (self + b) % N
-    func modAdd(_ b: BigNum, _ N: BigNum) -> BigNum {
+    func add(_ b: BigNum, modulus: BigNum) -> BigNum {
         return operationWithCtx {
-            BN_mod_add($0.ctx, self.ctx, b.ctx, N.ctx, $1)
+            BN_mod_add($0.ctx, self.ctx, b.ctx, modulus.ctx, $1)
         }
     }
 
     /// Returns: (a - b) % N
-    func modSub(_ b: BigNum, _ N: BigNum) -> BigNum {
+    func sub(_ b: BigNum, modulus: BigNum) -> BigNum {
         return operationWithCtx {
-            BN_mod_sub($0.ctx, self.ctx, b.ctx, N.ctx, $1)
+            BN_mod_sub($0.ctx, self.ctx, b.ctx, modulus.ctx, $1)
         }
     }
 
     /// Returns: (a * b) % N
-    func modMul(_ b: BigNum, _ N: BigNum) -> BigNum {
+    func mul(_ b: BigNum, modulus: BigNum) -> BigNum {
         return operationWithCtx {
-            BN_mod_mul($0.ctx, self.ctx, b.ctx, N.ctx, $1)
+            BN_mod_mul($0.ctx, self.ctx, b.ctx, modulus.ctx, $1)
         }
     }
 
     /// Returns: (a ** 2) % N
-    func modSqr(_ N: BigNum) -> BigNum {
+    func sqr(modulus: BigNum) -> BigNum {
         return operationWithCtx {
-            BN_mod_sqr($0.ctx, self.ctx, N.ctx, $1)
+            BN_mod_sqr($0.ctx, self.ctx, modulus.ctx, $1)
         }
     }
 
     /// Returns: (a ** p) % N
-    func modPower(_ p: BigNum, _ N: BigNum) -> BigNum {
+    func power(_ p: BigNum, modulus: BigNum) -> BigNum {
         return operationWithCtx {
-            BN_mod_exp($0.ctx, self.ctx, p.ctx, N.ctx, $1)
+            BN_mod_exp($0.ctx, self.ctx, p.ctx, modulus.ctx, $1)
         }
     }
 }

@@ -67,7 +67,7 @@ final class BigNumTests: XCTestCase {
         let N = BigNum(87178291199)
         let a = BigNum(28868624873)
         let b = BigNum(28333868624873)
-        let c = a.modAdd(b, N)
+        let c = a.add(b, modulus: N)
         XCTAssertEqual(c, BigNum((28868624873 + 28333868624873) % 87178291199))
     }
     
@@ -75,7 +75,7 @@ final class BigNumTests: XCTestCase {
         let N = BigNum(87178291199)
         let a = BigNum(28333868624873)
         let b = BigNum(28868624873)
-        let c = a.modSub(b, N)
+        let c = a.sub(b, modulus: N)
         XCTAssertEqual(c, BigNum((28333868624873 - 28868624873) % 87178291199))
     }
     
@@ -83,14 +83,14 @@ final class BigNumTests: XCTestCase {
         let N = BigNum(87178291199)
         let a = BigNum(67)
         let b = BigNum(28876783243)
-        let c = a.modMul(b, N)
+        let c = a.mul(b, modulus: N)
         XCTAssertEqual(c, BigNum((67 * 28876783243) % 87178291199))
     }
     
     func testModSquare() {
         let N = BigNum(2971215073)
         let a = BigNum(67647)
-        let c = a.modSqr(N)
+        let c = a.sqr(modulus:N)
         XCTAssertEqual(c, BigNum((67647 * 67647) % 2971215073))
     }
     
@@ -98,7 +98,7 @@ final class BigNumTests: XCTestCase {
         let N = BigNum(433494437)
         let a = BigNum(67)
         let b = BigNum(7)
-        let c = a.modPower(b, N)
+        let c = a.power(b, modulus: N)
         XCTAssertEqual(c, BigNum(Int(truncating: NSDecimalNumber(decimal: pow(67,7))) % 433494437))
     }
     
@@ -144,7 +144,7 @@ final class BigNumTests: XCTestCase {
             "fcd65f3f280b6dadabae0401a9ae557ad27939730ce146319aa7f08d1e33"
         )
         let g = BigNum(2)
-        let A = g.modPower(a, N)
+        let A = g.power(a, modulus: N)
         XCTAssertEqual(A, expectedResult)
     }
     

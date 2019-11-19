@@ -1,5 +1,4 @@
 module CBigNumOpenSSL [system] {
     link "ssl"
-    link "crypto"
 }
 
