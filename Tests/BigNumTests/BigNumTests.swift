@@ -60,7 +60,7 @@ final class BigNumTests: XCTestCase {
         let a = BigNum(45)
         let b = BigNum(6)
         let c = a.power(b)
-        XCTAssertEqual(c, BigNum(Int(truncating: NSDecimalNumber(decimal: pow(45,6)))))
+        XCTAssertEqual(c, BigNum(Int(pow(Double(45),Double(6)))))
     }
 
     func testModAdd() {
@@ -99,7 +99,7 @@ final class BigNumTests: XCTestCase {
         let a = BigNum(67)
         let b = BigNum(7)
         let c = a.power(b, modulus: N)
-        XCTAssertEqual(c, BigNum(Int(truncating: NSDecimalNumber(decimal: pow(67,7))) % 433494437))
+        XCTAssertEqual(c, BigNum(Int(pow(Double(67),Double(7))) % 433494437))
     }
     
     func testLargeModPower() {
