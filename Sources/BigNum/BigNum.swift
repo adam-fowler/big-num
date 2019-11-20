@@ -238,4 +238,22 @@ public extension BigNum {
             BN_pseudo_rand_range($0.ctx, max.ctx)
         }
     }
+    
+    /// prime number generator
+    static func generatePrime(bitSize: Int32, safe: Bool, add: BigNum? = nil, remainder: BigNum? = nil) -> BigNum? {
+        let result = BigNum()
+        if BN_generate_prime(result.ctx, bitSize, safe ? 1 : 0, add?.ctx, remainder?.ctx, nil, nil) == nil {
+            return nil
+        }
+        return result
+    }
+    
+    /// prime number generator
+    func isPrime(numChecks: Int32) -> Bool {
+        let context = BN_CTX_new()
+        defer {
+            BN_CTX_free(context)
+        }
+        return BN_is_prime(self.ctx, numChecks, nil, context, nil) == 1
+    }
 }
