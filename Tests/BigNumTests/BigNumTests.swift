@@ -205,7 +205,8 @@ final class BigNumTests: XCTestCase {
         }
         print(factorial)
         for _ in 1..<100 {
-            let random = BigNum.psuedo_random(max: BigNum(1000))
+            // get random number in range 1..<1000
+            let random = BigNum.psuedo_random(max: BigNum(999)) + 1
             XCTAssertEqual(BigNum.gcd(random, factorial), random)
         }
         
