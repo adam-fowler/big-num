@@ -204,12 +204,9 @@ final class BigNumTests: XCTestCase {
             factorial = factorial * BigNum(i)
         }
         print(factorial)
-        for _ in 1..<100 {
-            // get random number in range 1..<1000
-            let random = BigNum.psuedo_random(max: BigNum(999)) + 1
-            XCTAssertEqual(BigNum.gcd(random, factorial), random)
+        for i in 1..<1000 {
+            XCTAssertEqual(BigNum.gcd(BigNum(i), factorial), BigNum(i))
         }
-        
     }
     
     func testPerformance() {
