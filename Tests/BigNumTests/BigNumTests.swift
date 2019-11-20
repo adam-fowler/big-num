@@ -173,8 +173,9 @@ final class BigNumTests: XCTestCase {
     }
     
     func testRandom() {
-        let r = BigNum.random(max: BigNum(hex:"08632508236508365038683453456340854678fe8726347")!)
-        print(r.hex)
+        let r = BigNum.random(bits: 96, top: .topBitSetToOne)
+        XCTAssertEqual(r.numBits(), 96)
+        XCTAssert(r.isBitSet(95))
     }
     
     func testPrime() {
@@ -249,5 +250,8 @@ final class BigNumTests: XCTestCase {
         ("testLeftShift", testLeftShift),
         ("testRightShift", testRightShift),
         ("testNotHex", testNotHex),
+        ("testRandom", testRandom),
+        ("testPrime", testPrime),
+        ("testFactorial", testFactorial),
     ]
 }

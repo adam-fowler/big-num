@@ -101,62 +101,64 @@ extension BigNum: ExpressibleByIntegerLiteral {
 
 //MARK: Operations
 
-func operation(_ block: (_ result: BigNum) -> Int32) -> BigNum {
-    let result = BigNum()
-    precondition(block(result) == 1)
-    return result
-}
+extension BigNum {
+    static func operation(_ block: (_ result: BigNum) -> Int32) -> BigNum {
+        let result = BigNum()
+        precondition(block(result) == 1)
+        return result
+    }
 
-func operationWithCtx(_ block: (BigNum, OpaquePointer?) -> Int32) -> BigNum {
-    let result = BigNum()
-    let context = BN_CTX_new()
-    precondition(block(result, context) == 1)
-    BN_CTX_free(context)
-    return result
+    static func operationWithCtx(_ block: (BigNum, OpaquePointer?) -> Int32) -> BigNum {
+        let result = BigNum()
+        let context = BN_CTX_new()
+        precondition(block(result, context) == 1)
+        BN_CTX_free(context)
+        return result
+    }
 }
 
 public func + (lhs: BigNum, rhs: BigNum) -> BigNum {
-    return operation {
+    return BigNum.operation {
         BN_add($0.ctx?.convert(), lhs.ctx?.convert(), rhs.ctx?.convert())
     }
 }
 
 public func - (lhs: BigNum, rhs: BigNum) -> BigNum {
-    return operation {
+    return BigNum.operation {
         BN_sub($0.ctx?.convert(), lhs.ctx?.convert(), rhs.ctx?.convert())
     }
 }
 
 public func * (lhs: BigNum, rhs: BigNum) -> BigNum {
-    return operationWithCtx {
+    return BigNum.operationWithCtx {
         BN_mul($0.ctx?.convert(), lhs.ctx?.convert(), rhs.ctx?.convert(), $1)
     }
 }
 
 /// Returns lhs / rhs, rounded to zero.
 public func / (lhs: BigNum, rhs: BigNum) -> BigNum {
-    return operationWithCtx {
+    return BigNum.operationWithCtx {
         BN_div($0.ctx?.convert(), nil, lhs.ctx?.convert(), rhs.ctx?.convert(), $1)
     }
 }
 
 /// Returns lhs / rhs, rounded to zero.
 public func % (lhs: BigNum, rhs: BigNum) -> BigNum {
-    return operationWithCtx {
+    return BigNum.operationWithCtx {
         BN_div(nil, $0.ctx?.convert(), lhs.ctx?.convert(), rhs.ctx?.convert(), $1)
     }
 }
 
 /// right shift
 public func >> (lhs: BigNum, shift: Int32) -> BigNum {
-    return operation {
+    return BigNum.operation {
         BN_rshift($0.ctx?.convert(), lhs.ctx?.convert(), shift)
     }
 }
 
 /// left shift
 public func << (lhs: BigNum, shift: Int32) -> BigNum {
-    return operation {
+    return BigNum.operation {
         BN_lshift($0.ctx?.convert(), lhs.ctx?.convert(), shift)
     }
 }
@@ -167,49 +169,49 @@ public extension BigNum {
 
     /// Returns: (self ** 2)
     func sqr() -> BigNum {
-        return operationWithCtx {
+        return BigNum.operationWithCtx {
             BN_sqr($0.ctx?.convert(), self.ctx?.convert(), $1)
         }
     }
 
     /// Returns: (self ** p)
     func power(_ p: BigNum) -> BigNum {
-        return operationWithCtx {
+        return BigNum.operationWithCtx {
             BN_exp($0.ctx?.convert(), self.ctx?.convert(), p.ctx?.convert(), $1)
         }
     }
     
     /// Returns: (self + b) % N
     func add(_ b: BigNum, modulus: BigNum) -> BigNum {
-        return operationWithCtx {
+        return BigNum.operationWithCtx {
             BN_mod_add($0.ctx?.convert(), self.ctx?.convert(), b.ctx?.convert(), modulus.ctx?.convert(), $1)
         }
     }
 
     /// Returns: (a - b) % N
     func sub(_ b: BigNum, modulus: BigNum) -> BigNum {
-        return operationWithCtx {
+        return BigNum.operationWithCtx {
             BN_mod_sub($0.ctx?.convert(), self.ctx?.convert(), b.ctx?.convert(), modulus.ctx?.convert(), $1)
         }
     }
 
     /// Returns: (a * b) % N
     func mul(_ b: BigNum, modulus: BigNum) -> BigNum {
-        return operationWithCtx {
+        return BigNum.operationWithCtx {
             BN_mod_mul($0.ctx?.convert(), self.ctx?.convert(), b.ctx?.convert(), modulus.ctx?.convert(), $1)
         }
     }
 
     /// Returns: (a ** 2) % N
     func sqr(modulus: BigNum) -> BigNum {
-        return operationWithCtx {
+        return BigNum.operationWithCtx {
             BN_mod_sqr($0.ctx?.convert(), self.ctx?.convert(), modulus.ctx?.convert(), $1)
         }
     }
 
     /// Returns: (a ** p) % N
     func power(_ p: BigNum, modulus: BigNum) -> BigNum {
-        return operationWithCtx {
+        return BigNum.operationWithCtx {
             BN_mod_exp($0.ctx?.convert(), self.ctx?.convert(), p.ctx?.convert(), modulus.ctx?.convert(), $1)
         }
     }
@@ -221,7 +223,31 @@ public extension BigNum {
         }
     }
     
+    /// Bitwise operations
+
+    func setBit(_ bit: Int32) {
+        BN_set_bit(self.ctx?.convert(), bit)
+    }
+    
+    func clearBit(_ bit: Int32) {
+        BN_clear_bit(self.ctx?.convert(), bit)
+    }
+    
+    func mask(_ bits: Int32) {
+        BN_mask_bits(self.ctx?.convert(), bits)
+    }
+
+    func isBitSet(_ bit: Int32) -> Bool {
+        let set = BN_is_bit_set(self.ctx?.convert(), bit)
+        return set == 1 ? true : false
+    }
+
+    func numBits() -> Int32 {
+        return BN_num_bits(self.ctx?.convert())
+    }
+    
     /// random number generators
+    
     enum Top: Int32 {
         case any = -1
         case topBitSetToOne = 0
