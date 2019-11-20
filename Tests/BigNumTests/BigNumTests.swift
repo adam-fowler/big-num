@@ -182,6 +182,19 @@ final class BigNumTests: XCTestCase {
         XCTAssert(r.isPrime(numChecks:128))
     }
     
+    func testFactorial() {
+        var factorial = BigNum(1)
+        for i in 1..<1000 {
+            factorial = factorial * BigNum(i)
+        }
+        print(factorial)
+        for _ in 1..<100 {
+            let random = BigNum.psuedo_random(max: BigNum(1000))
+            XCTAssertEqual(BigNum.gcd(random, factorial), random)
+        }
+        
+    }
+    
     static var allTests = [
         ("testConversion", testConversion),
         ("testBasic", testBasic),
