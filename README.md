@@ -35,6 +35,7 @@ Another standard operation that BigNum can be used for is generating [Secure Rem
 - Random number `a`
 - A hashing function `H`
 - username and password
+
 A value `A` is calculated and sent to the server
 ```
 A = g.power(a, modulus: N)
@@ -58,4 +59,4 @@ A hashed version of S can be sent back to the server and the server can use that
 
 ## Compatibility
 
-BigNum works on both macOS and Linux. It requires Swift 5.0. Unfortunately because BigNum makes use of the openssl library BigNum is not available on iOS.
+BigNum works on both macOS and Linux. It requires Swift 5.0. Unfortunately because BigNum makes use of the OpenSSL library BigNum is not available on iOS.
