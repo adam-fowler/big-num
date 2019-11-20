@@ -34,5 +34,4 @@ jobs:
         apt-get update -qq
         apt-get install -q -y tzdata libssl-dev
     - name: Test
-      if: matrix.tag < 5.1
       run: swift test --parallel --enable-code-coverage
