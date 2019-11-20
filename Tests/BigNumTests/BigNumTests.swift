@@ -12,42 +12,57 @@ final class BigNumTests: XCTestCase {
         let a = BigNum(13)
         let b = BigNum(105)
         let c = a + b
-        XCTAssertEqual(c, BigNum(118))
+        XCTAssertEqual(c, 118)
     }
 
     func testAdd() {
-        let a = BigNum(132435353453)
+        var a = BigNum(132435353453)
         let b = BigNum(23453532535)
         let c = a + b
         XCTAssertEqual(c, BigNum(132435353453+23453532535))
+
+        a += b
+        XCTAssertEqual(c, a)
     }
 
     func testSubtract() {
-        let a = BigNum(132435987897453)
+        var a = BigNum(132435987897453)
         let b = BigNum(23453532535)
         let c = a - b
         XCTAssertEqual(c, BigNum(132435987897453-23453532535))
+        
+        a -= b
+        XCTAssertEqual(c, a)
     }
 
     func testMultiple() {
-        let a = BigNum(45)
+        var a = BigNum(45)
         let b = BigNum(23453532535)
         let c = a * b
         XCTAssertEqual(c, BigNum(45*23453532535))
+        
+        a *= b
+        XCTAssertEqual(c, a)
     }
 
     func testDivide() {
-        let a = BigNum(487380435867034585)
+        var a = BigNum(487380435867034585)
         let b = BigNum(23453532535)
         let c = a / b
         XCTAssertEqual(c, BigNum(487380435867034585 / 23453532535))
+        
+        a /= b
+        XCTAssertEqual(c, a)
     }
 
     func testModulus() {
-        let a = BigNum(487380435867034585)
+        var a = BigNum(487380435867034585)
         let b = BigNum(23453532535)
         let c = a % b
         XCTAssertEqual(c, BigNum(487380435867034585 % 23453532535))
+        
+        a %= b
+        XCTAssertEqual(c, a)
     }
     
     func testSquare() {

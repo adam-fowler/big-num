@@ -167,6 +167,36 @@ public func << (lhs: BigNum, shift: Int32) -> BigNum {
 
 public extension BigNum {
 
+    static func += (lhs: inout BigNum, rhs: BigNum) {
+        lhs = BigNum.operation {
+            BN_add($0.ctx?.convert(), lhs.ctx?.convert(), rhs.ctx?.convert())
+        }
+    }
+    
+    static func -= (lhs: inout BigNum, rhs: BigNum) {
+        lhs = BigNum.operation {
+            BN_sub($0.ctx?.convert(), lhs.ctx?.convert(), rhs.ctx?.convert())
+        }
+    }
+    
+    static func *= (lhs: inout BigNum, rhs: BigNum) {
+        lhs = BigNum.operationWithCtx {
+            BN_mul($0.ctx?.convert(), lhs.ctx?.convert(), rhs.ctx?.convert(), $1)
+        }
+    }
+    
+    static func /= (lhs: inout BigNum, rhs: BigNum) {
+        lhs = BigNum.operationWithCtx {
+            BN_div($0.ctx?.convert(), nil, lhs.ctx?.convert(), rhs.ctx?.convert(), $1)
+        }
+    }
+    
+    static func %= (lhs: inout BigNum, rhs: BigNum) {
+        lhs = BigNum.operationWithCtx {
+            BN_div(nil, $0.ctx?.convert(), lhs.ctx?.convert(), rhs.ctx?.convert(), $1)
+        }
+    }
+    
     /// Returns: (self ** 2)
     func sqr() -> BigNum {
         return BigNum.operationWithCtx {
