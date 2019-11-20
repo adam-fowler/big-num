@@ -120,14 +120,14 @@ final class BigNumTests: XCTestCase {
             + "F12FFA06D98A0864D87602733EC86A64521F2B18177B200C"
             + "BBE117577A615D6C770988C0BAD946E208E24FA074E5AB31"
             + "43DB5BFCE0FD108E4B82D120A93AD2CAFFFFFFFFFFFFFFFF"
-        )
+        )!
         let a = BigNum(hex:
             "37981750af33fdf93fc6dce831fe794aba312572e7c33472528" +
             "54e5ce7c7f40343f5ad82f9ad3585c8cb1184c54c562f8317fc" +
             "2924c6c7ade72f1e8d964f606e040c8f9f0b12e3fe6b6828202" +
             "a5e40ca0103e880531921e56de3acc410331b8e5ddcd0dbf249" +
             "bfa104f6b797719613aa50eabcdb40fd5457f64861dd71890eba"
-        )
+        )!
         let expectedResult = BigNum(hex:
             "f93b917abccc667f4fac29d1e4c111bcd37d2c37577e7f113ad85030ec6" +
             "157c70dfee728ac4aee9a7631d85a68aec3ef72864b6e8a134f5c5eef89" +
@@ -142,12 +142,35 @@ final class BigNumTests: XCTestCase {
             "e4aa607d633a94a06bee4386c7444e06fd584282b9d576be318f0f20305" +
             "7e80996f79a2bb0a63ad4786d5cc12b1321bd6644e001cee194171f5b04" +
             "fcd65f3f280b6dadabae0401a9ae557ad27939730ce146319aa7f08d1e33"
-        )
+        )!
         let g = BigNum(2)
         let A = g.power(a, modulus: N)
         XCTAssertEqual(A, expectedResult)
     }
     
+    func testGCD() {
+        let a = BigNum(333)
+        let b = BigNum(27)
+        let gcd = BigNum.gcd(a,b)
+        XCTAssertEqual(gcd, BigNum(9))
+    }
+    
+    func testLeftShift() {
+        let a = BigNum(hex: "87237634a5fed7")!
+        let b = a << 4
+        XCTAssertEqual(b, BigNum(hex: "87237634a5fed70")!)
+    }
+    
+    func testRightShift() {
+        let a = BigNum(hex: "87237634aed78dc90a5fed7")!
+        let b = a >> 12
+        XCTAssertEqual(b, BigNum(hex: "87237634aed78dc90a5f")!)
+    }
+    
+    func testNotHex() {
+        let a = BigNum(hex: "sdf876sjhk")
+        XCTAssertNil(a)
+    }
     static var allTests = [
         ("testConversion", testConversion),
         ("testBasic", testBasic),
@@ -164,5 +187,9 @@ final class BigNumTests: XCTestCase {
         ("testModSquare", testModSquare),
         ("testModPower", testModPower),
         ("testLargeModPower", testLargeModPower),
+        ("testGCD", testGCD),
+        ("testLeftShift", testLeftShift),
+        ("testRightShift", testRightShift),
+        ("testNotHex", testNotHex),
     ]
 }

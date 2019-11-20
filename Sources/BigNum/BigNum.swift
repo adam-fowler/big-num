@@ -1,9 +1,14 @@
 import CBigNum
 import Foundation
 
+/// Swift wrapper class for BIGNUM functions in OpenSSL library
 public final class BigNum {
     internal let ctx: UnsafeMutablePointer<BIGNUM>
 
+    public init() {
+        ctx = BN_new()
+    }
+    
     public init(_ int: Int) {
         var ctx: UnsafeMutablePointer<BIGNUM>? = nil
         
@@ -15,19 +20,19 @@ public final class BigNum {
         self.ctx = ctx!
     }
 
-    public init() {
-        ctx = BN_new()
-    }
-    
-    public init(_ dec: String) {
+    public init?(_ dec: String) {
         var ctx: UnsafeMutablePointer<BIGNUM>? = nil
-        BN_dec2bn(&ctx, dec)
+        if BN_dec2bn(&ctx, dec) == 0 {
+            return nil
+        }
         self.ctx = ctx!
     }
 
-    public init(hex: String) {
+    public init?(hex: String) {
         var ctx: UnsafeMutablePointer<BIGNUM>? = nil
-        BN_hex2bn(&ctx, hex)
+        if BN_hex2bn(&ctx, hex) == 0 {
+            return nil
+        }
         self.ctx = ctx!
     }
 
@@ -125,6 +130,20 @@ public func % (lhs: BigNum, rhs: BigNum) -> BigNum {
     }
 }
 
+/// right shift
+public func >> (lhs: BigNum, shift: Int32) -> BigNum {
+    return operation {
+        BN_rshift($0.ctx, lhs.ctx, shift)
+    }
+}
+
+/// left shift
+public func << (lhs: BigNum, shift: Int32) -> BigNum {
+    return operation {
+        BN_lshift($0.ctx, lhs.ctx, shift)
+    }
+}
+
 //MARK: Member Operations
 
 public extension BigNum {
@@ -175,6 +194,13 @@ public extension BigNum {
     func power(_ p: BigNum, modulus: BigNum) -> BigNum {
         return operationWithCtx {
             BN_mod_exp($0.ctx, self.ctx, p.ctx, modulus.ctx, $1)
+        }
+    }
+    
+    /// Return greatest common denominator
+    static func gcd(_ first: BigNum, _ second: BigNum) -> BigNum {
+        return operationWithCtx {
+            BN_gcd($0.ctx, first.ctx, second.ctx, $1)
         }
     }
 }
