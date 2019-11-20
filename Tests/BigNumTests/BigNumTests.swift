@@ -178,7 +178,7 @@ final class BigNumTests: XCTestCase {
     }
     
     func testPrime() {
-        let r = BigNum.generatePrime(bitSize: 128, safe: false)!
+        let r = BigNum.generatePrime(bitSize: 128, safe: false)
         XCTAssert(r.isPrime(numChecks:128))
     }
     

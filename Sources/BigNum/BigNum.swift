@@ -240,12 +240,10 @@ public extension BigNum {
     }
     
     /// prime number generator
-    static func generatePrime(bitSize: Int32, safe: Bool, add: BigNum? = nil, remainder: BigNum? = nil) -> BigNum? {
-        let result = BigNum()
-        if BN_generate_prime(result.ctx, bitSize, safe ? 1 : 0, add?.ctx, remainder?.ctx, nil, nil) == nil {
-            return nil
+    static func generatePrime(bitSize: Int32, safe: Bool, add: BigNum? = nil, remainder: BigNum? = nil) -> BigNum {
+        return operation {
+            BN_generate_prime_ex($0.ctx, bitSize, safe ? 1 : 0, add?.ctx, remainder?.ctx, nil)
         }
-        return result
     }
     
     /// prime number generator
@@ -254,6 +252,6 @@ public extension BigNum {
         defer {
             BN_CTX_free(context)
         }
-        return BN_is_prime(self.ctx, numChecks, nil, context, nil) == 1
+        return BN_is_prime_ex(self.ctx, numChecks, context, nil) == 1
     }
 }
