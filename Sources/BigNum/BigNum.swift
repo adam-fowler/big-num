@@ -1,68 +1,77 @@
+///
+/// BigNum.swift
+/// A swift wrapper for BIGNUM functions in OpenSSL library
+/// Inspired by the implementation here https://github.com/Bouke/Bignum
+///
+
 import CBigNum
 import Foundation
 
 /// Swift wrapper class for BIGNUM functions in OpenSSL library
 public final class BigNum {
-    internal let ctx: UnsafeMutablePointer<BIGNUM>
-
+    // ctx is an `OpaquePointer` because in OpenSSL 1.1 `BIGNUM` is an incomplete type. Still have to jump
+    // through hoops though because in other builds it is complete type and the compiler complains about
+    // casting to and from an OpaquePointer
+    internal let ctx: OpaquePointer?
+    
     public init() {
-        ctx = BN_new()
+        ctx = BN_new().convert()
     }
     
     public init(_ int: Int) {
-        var ctx: UnsafeMutablePointer<BIGNUM>? = nil
-        
+        let ctx = BN_new()
         withUnsafePointer(to: int.bigEndian) { bytes in
             let raw = UnsafeRawPointer(bytes)
             let p = raw.bindMemory(to: UInt8.self, capacity: MemoryLayout<Int>.size)
-            ctx = BN_bin2bn(p, Int32(MemoryLayout<Int>.size), nil)
+            BN_bin2bn(p, Int32(MemoryLayout<Int>.size), ctx)
         }
-        self.ctx = ctx!
+        self.ctx = ctx!.convert()
     }
 
     public init?(_ dec: String) {
-        var ctx: UnsafeMutablePointer<BIGNUM>? = nil
+        var ctx = BN_new()
         if BN_dec2bn(&ctx, dec) == 0 {
             return nil
         }
-        self.ctx = ctx!
+        self.ctx = ctx!.convert()
     }
 
     public init?(hex: String) {
-        var ctx: UnsafeMutablePointer<BIGNUM>? = nil
+        var ctx = BN_new()
         if BN_hex2bn(&ctx, hex) == 0 {
             return nil
         }
-        self.ctx = ctx!
+        self.ctx = ctx!.convert()
     }
 
-    public convenience init(data: Data) {
-        self.init()
+    public init(data: Data) {
+        let ctx = BN_new()
         _ = data.withUnsafeBytes { bytes in
             let p = bytes.bindMemory(to: UInt8.self)
             BN_bin2bn(p.baseAddress, Int32(data.count), ctx)
         }
+        self.ctx = ctx!.convert()
     }
 
     deinit {
-        BN_free(ctx)
+        BN_free(ctx?.convert())
     }
 
     public var data: Data {
-        var data = Data(count: Int((BN_num_bits(ctx) + 7) / 8))
+        var data = Data(count: Int((BN_num_bits(ctx?.convert()) + 7) / 8))
         _ = data.withUnsafeMutableBytes { bytes in
             let p = bytes.bindMemory(to: UInt8.self)
-            BN_bn2bin(ctx, p.baseAddress)
+            BN_bn2bin(ctx?.convert(), p.baseAddress)
         }
         return data
     }
 
     public var dec: String {
-        return String(validatingUTF8: BN_bn2dec(ctx))!
+        return String(validatingUTF8: BN_bn2dec(ctx?.convert()))!
     }
 
     public var hex: String {
-        return String(validatingUTF8: BN_bn2hex(ctx))!
+        return String(validatingUTF8: BN_bn2hex(ctx?.convert()))!
     }
 }
 
@@ -74,11 +83,11 @@ extension BigNum: CustomStringConvertible {
 
 extension BigNum: Comparable {
     public static func == (lhs: BigNum, rhs: BigNum) -> Bool {
-        return BN_cmp(lhs.ctx, rhs.ctx) == 0
+        return BN_cmp(lhs.ctx?.convert(), rhs.ctx?.convert()) == 0
     }
 
     public static func < (lhs: BigNum, rhs: BigNum) -> Bool {
-        return BN_cmp(lhs.ctx, rhs.ctx) == -1
+        return BN_cmp(lhs.ctx?.convert(), rhs.ctx?.convert()) == -1
     }
 }
 
@@ -108,47 +117,47 @@ func operationWithCtx(_ block: (BigNum, OpaquePointer?) -> Int32) -> BigNum {
 
 public func + (lhs: BigNum, rhs: BigNum) -> BigNum {
     return operation {
-        BN_add($0.ctx, lhs.ctx, rhs.ctx)
+        BN_add($0.ctx?.convert(), lhs.ctx?.convert(), rhs.ctx?.convert())
     }
 }
 
 public func - (lhs: BigNum, rhs: BigNum) -> BigNum {
     return operation {
-        BN_sub($0.ctx, lhs.ctx, rhs.ctx)
+        BN_sub($0.ctx?.convert(), lhs.ctx?.convert(), rhs.ctx?.convert())
     }
 }
 
 public func * (lhs: BigNum, rhs: BigNum) -> BigNum {
     return operationWithCtx {
-        BN_mul($0.ctx, lhs.ctx, rhs.ctx, $1)
+        BN_mul($0.ctx?.convert(), lhs.ctx?.convert(), rhs.ctx?.convert(), $1)
     }
 }
 
 /// Returns lhs / rhs, rounded to zero.
 public func / (lhs: BigNum, rhs: BigNum) -> BigNum {
     return operationWithCtx {
-        BN_div($0.ctx, nil, lhs.ctx, rhs.ctx, $1)
+        BN_div($0.ctx?.convert(), nil, lhs.ctx?.convert(), rhs.ctx?.convert(), $1)
     }
 }
 
 /// Returns lhs / rhs, rounded to zero.
 public func % (lhs: BigNum, rhs: BigNum) -> BigNum {
     return operationWithCtx {
-        BN_div(nil, $0.ctx, lhs.ctx, rhs.ctx, $1)
+        BN_div(nil, $0.ctx?.convert(), lhs.ctx?.convert(), rhs.ctx?.convert(), $1)
     }
 }
 
 /// right shift
 public func >> (lhs: BigNum, shift: Int32) -> BigNum {
     return operation {
-        BN_rshift($0.ctx, lhs.ctx, shift)
+        BN_rshift($0.ctx?.convert(), lhs.ctx?.convert(), shift)
     }
 }
 
 /// left shift
 public func << (lhs: BigNum, shift: Int32) -> BigNum {
     return operation {
-        BN_lshift($0.ctx, lhs.ctx, shift)
+        BN_lshift($0.ctx?.convert(), lhs.ctx?.convert(), shift)
     }
 }
 
@@ -159,56 +168,56 @@ public extension BigNum {
     /// Returns: (self ** 2)
     func sqr() -> BigNum {
         return operationWithCtx {
-            BN_sqr($0.ctx, self.ctx, $1)
+            BN_sqr($0.ctx?.convert(), self.ctx?.convert(), $1)
         }
     }
 
     /// Returns: (self ** p)
     func power(_ p: BigNum) -> BigNum {
         return operationWithCtx {
-            BN_exp($0.ctx, self.ctx, p.ctx, $1)
+            BN_exp($0.ctx?.convert(), self.ctx?.convert(), p.ctx?.convert(), $1)
         }
     }
     
     /// Returns: (self + b) % N
     func add(_ b: BigNum, modulus: BigNum) -> BigNum {
         return operationWithCtx {
-            BN_mod_add($0.ctx, self.ctx, b.ctx, modulus.ctx, $1)
+            BN_mod_add($0.ctx?.convert(), self.ctx?.convert(), b.ctx?.convert(), modulus.ctx?.convert(), $1)
         }
     }
 
     /// Returns: (a - b) % N
     func sub(_ b: BigNum, modulus: BigNum) -> BigNum {
         return operationWithCtx {
-            BN_mod_sub($0.ctx, self.ctx, b.ctx, modulus.ctx, $1)
+            BN_mod_sub($0.ctx?.convert(), self.ctx?.convert(), b.ctx?.convert(), modulus.ctx?.convert(), $1)
         }
     }
 
     /// Returns: (a * b) % N
     func mul(_ b: BigNum, modulus: BigNum) -> BigNum {
         return operationWithCtx {
-            BN_mod_mul($0.ctx, self.ctx, b.ctx, modulus.ctx, $1)
+            BN_mod_mul($0.ctx?.convert(), self.ctx?.convert(), b.ctx?.convert(), modulus.ctx?.convert(), $1)
         }
     }
 
     /// Returns: (a ** 2) % N
     func sqr(modulus: BigNum) -> BigNum {
         return operationWithCtx {
-            BN_mod_sqr($0.ctx, self.ctx, modulus.ctx, $1)
+            BN_mod_sqr($0.ctx?.convert(), self.ctx?.convert(), modulus.ctx?.convert(), $1)
         }
     }
 
     /// Returns: (a ** p) % N
     func power(_ p: BigNum, modulus: BigNum) -> BigNum {
         return operationWithCtx {
-            BN_mod_exp($0.ctx, self.ctx, p.ctx, modulus.ctx, $1)
+            BN_mod_exp($0.ctx?.convert(), self.ctx?.convert(), p.ctx?.convert(), modulus.ctx?.convert(), $1)
         }
     }
     
     /// Return greatest common denominator
     static func gcd(_ first: BigNum, _ second: BigNum) -> BigNum {
         return operationWithCtx {
-            BN_gcd($0.ctx, first.ctx, second.ctx, $1)
+            BN_gcd($0.ctx?.convert(), first.ctx?.convert(), second.ctx?.convert(), $1)
         }
     }
     
@@ -222,35 +231,35 @@ public extension BigNum {
     /// return cryptographically strong random number of maximum size defined in bits. random needs seeding prior to be called
     static func random(bits: Int32, top: Top = .any, odd: Bool = false) -> BigNum {
         return operation {
-            BN_rand($0.ctx, bits, top.rawValue, odd ? 1 : 0)
+            BN_rand($0.ctx?.convert(), bits, top.rawValue, odd ? 1 : 0)
         }
     }
     
     /// return pseudo random number of maximum size defined in bits.
     static func psuedo_random(bits: Int32, top: Top = .any, odd: Bool = false) -> BigNum {
         return operation {
-            BN_pseudo_rand($0.ctx, bits, top.rawValue, odd ? 1 : 0)
+            BN_pseudo_rand($0.ctx?.convert(), bits, top.rawValue, odd ? 1 : 0)
         }
     }
     
     /// return cryptographically strong random number in range (0...max-1). random needs seeding prior to be called
     static func random(max: BigNum) -> BigNum {
         return operation {
-            BN_rand_range($0.ctx, max.ctx)
+            BN_rand_range($0.ctx?.convert(), max.ctx?.convert())
         }
     }
     
     /// return pseudo random number in range (0..<max)
     static func psuedo_random(max: BigNum) -> BigNum {
         return operation {
-            BN_pseudo_rand_range($0.ctx, max.ctx)
+            BN_pseudo_rand_range($0.ctx?.convert(), max.ctx?.convert())
         }
     }
     
     /// prime number generator
     static func generatePrime(bitSize: Int32, safe: Bool, add: BigNum? = nil, remainder: BigNum? = nil) -> BigNum {
         return operation {
-            BN_generate_prime_ex($0.ctx, bitSize, safe ? 1 : 0, add?.ctx, remainder?.ctx, nil)
+            BN_generate_prime_ex($0.ctx?.convert(), bitSize, safe ? 1 : 0, add?.ctx?.convert(), remainder?.ctx?.convert(), nil)
         }
     }
     
@@ -260,6 +269,24 @@ public extension BigNum {
         defer {
             BN_CTX_free(context)
         }
-        return BN_is_prime_ex(self.ctx, numChecks, context, nil) == 1
+        return BN_is_prime_ex(self.ctx?.convert(), numChecks, context, nil) == 1
     }
 }
+
+/// extensions taken from swift-nio
+extension OpaquePointer {
+    func convert<T>() -> UnsafeMutablePointer<T> {
+        return .init(self)
+    }
+
+    func convert() -> OpaquePointer {
+        return self
+    }
+}
+
+extension UnsafeMutablePointer {
+    func convert() -> OpaquePointer {
+        return .init(self)
+    }
+}
+
