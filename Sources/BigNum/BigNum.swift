@@ -203,4 +203,39 @@ public extension BigNum {
             BN_gcd($0.ctx, first.ctx, second.ctx, $1)
         }
     }
+    
+    /// random number generators
+    enum Top: Int32 {
+        case any = -1
+        case topBitSetToOne = 0
+        case topTwoBitsSetToOne = 1
+    }
+
+    /// return cryptographically strong random number of maximum size defined in bits. random needs seeding prior to be called
+    static func random(bits: Int32, top: Top = .any, odd: Bool = false) -> BigNum {
+        return operation {
+            BN_rand($0.ctx, bits, top.rawValue, odd ? 1 : 0)
+        }
+    }
+    
+    /// return pseudo random number of maximum size defined in bits.
+    static func psuedo_random(bits: Int32, top: Top = .any, odd: Bool = false) -> BigNum {
+        return operation {
+            BN_pseudo_rand($0.ctx, bits, top.rawValue, odd ? 1 : 0)
+        }
+    }
+    
+    /// return cryptographically strong random number in range (0...max-1). random needs seeding prior to be called
+    static func random(max: BigNum) -> BigNum {
+        return operation {
+            BN_rand_range($0.ctx, max.ctx)
+        }
+    }
+    
+    /// return pseudo random number in range (0..<max)
+    static func psuedo_random(max: BigNum) -> BigNum {
+        return operation {
+            BN_pseudo_rand_range($0.ctx, max.ctx)
+        }
+    }
 }

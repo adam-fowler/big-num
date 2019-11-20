@@ -171,6 +171,12 @@ final class BigNumTests: XCTestCase {
         let a = BigNum(hex: "sdf876sjhk")
         XCTAssertNil(a)
     }
+    
+    func testRandom() {
+        let r = BigNum.random(max: BigNum(hex:"08632508236508365038683453456340854678fe8726347")!)
+        print(r.hex)
+    }
+    
     static var allTests = [
         ("testConversion", testConversion),
         ("testBasic", testBasic),
