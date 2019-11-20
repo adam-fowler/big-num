@@ -14,8 +14,8 @@ public final class BigNum {
         
         withUnsafePointer(to: int.bigEndian) { bytes in
             let raw = UnsafeRawPointer(bytes)
-            let p = raw.bindMemory(to: UInt8.self, capacity: Int.bitWidth/8)
-            ctx = BN_bin2bn(p, Int32(Int.bitWidth/8), nil)
+            let p = raw.bindMemory(to: UInt8.self, capacity: MemoryLayout<Int>.size)
+            ctx = BN_bin2bn(p, Int32(MemoryLayout<Int>.size), nil)
         }
         self.ctx = ctx!
     }
