@@ -82,6 +82,14 @@ extension BigNum: Comparable {
     }
 }
 
+extension BigNum: ExpressibleByIntegerLiteral {
+    public typealias IntegerLiteralType = Int
+
+    public convenience init(integerLiteral value: Int) {
+        self.init(value)
+    }
+}
+
 //MARK: Operations
 
 func operation(_ block: (_ result: BigNum) -> Int32) -> BigNum {
