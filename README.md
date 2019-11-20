@@ -1,3 +1,3 @@
 # BigNum
 
-A description of this package.
+A swift interface to the OpenSSL BIGNUM library.
