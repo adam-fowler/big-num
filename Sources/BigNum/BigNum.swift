@@ -44,11 +44,15 @@ public final class BigNum {
         self.ctx = ctx!.convert()
     }
 
-    public init(data: Data) {
+    public init<D: DataProtocol>(data: D) {
         let ctx = BN_new()
-        _ = data.withUnsafeBytes { bytes in
-            let p = bytes.bindMemory(to: UInt8.self)
-            BN_bin2bn(p.baseAddress, Int32(data.count), ctx)
+        if data.withContiguousStorageIfAvailable({bytes in
+            BN_bin2bn(bytes.baseAddress, .init(data.count), ctx)
+        }) == nil {
+            var buffer = UnsafeMutableBufferPointer<UInt8>.allocate(capacity: data.count)
+            data.copyBytes(to: buffer)
+            defer { buffer.deallocate() }
+            BN_bin2bn(buffer.baseAddress, .init(data.count), ctx)
         }
         self.ctx = ctx!.convert()
     }
