@@ -70,6 +70,15 @@ public final class BigNum {
         return data
     }
 
+    public var bytes: [UInt8] {
+        var bytes = [UInt8].init(repeating: 0, count: Int((BN_num_bits(ctx?.convert()) + 7) / 8))
+        _ = bytes.withUnsafeMutableBytes { bytes in
+            let p = bytes.bindMemory(to: UInt8.self)
+            BN_bn2bin(ctx?.convert(), p.baseAddress)
+        }
+        return bytes
+    }
+
     public var dec: String {
         return String(validatingUTF8: BN_bn2dec(ctx?.convert()))!
     }
