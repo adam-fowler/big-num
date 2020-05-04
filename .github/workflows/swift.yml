@@ -1,6 +1,6 @@
 name: Swift
 
-on: [push, pull_request, release]
+on: [push, pull_request]
 
 jobs:
   macOS:
@@ -18,12 +18,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        tag: ['5.0', '5.1']
+        tag: ['5.0', '5.1', '5.2']
     container:
       image: swift:${{ matrix.tag }}
-      volumes:
-      - $GITHUB_WORKSPACE:/src
-      options: --workdir /src
     steps:
     - name: Checkout
       uses: actions/checkout@v1
