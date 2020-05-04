@@ -44,6 +44,17 @@ public final class BigNum {
         self.ctx = ctx!.convert()
     }
 
+    public init<D: ContiguousBytes>(bytes: D) {
+        let ctx = BN_new()
+        bytes.withUnsafeBytes { bytes in
+            if let p = bytes.baseAddress?.assumingMemoryBound(to: UInt8.self) {
+                BN_bin2bn(p, .init(bytes.count), ctx)
+            }
+        }
+        self.ctx = ctx!.convert()
+    }
+
+    @available(*, deprecated, message: "Please user init(bytes:) instead")
     public init<D: DataProtocol>(data: D) {
         let ctx = BN_new()
         if data.withContiguousStorageIfAvailable({bytes in
@@ -56,7 +67,7 @@ public final class BigNum {
         }
         self.ctx = ctx!.convert()
     }
-
+    
     deinit {
         BN_free(ctx?.convert())
     }
@@ -64,8 +75,9 @@ public final class BigNum {
     public var data: Data {
         var data = Data(count: Int((BN_num_bits(ctx?.convert()) + 7) / 8))
         _ = data.withUnsafeMutableBytes { bytes in
-            let p = bytes.bindMemory(to: UInt8.self)
-            BN_bn2bin(ctx?.convert(), p.baseAddress)
+            if let p = bytes.baseAddress?.assumingMemoryBound(to: UInt8.self) {
+                BN_bn2bin(ctx?.convert(), p)
+            }
         }
         return data
     }
@@ -73,8 +85,9 @@ public final class BigNum {
     public var bytes: [UInt8] {
         var bytes = [UInt8].init(repeating: 0, count: Int((BN_num_bits(ctx?.convert()) + 7) / 8))
         _ = bytes.withUnsafeMutableBytes { bytes in
-            let p = bytes.bindMemory(to: UInt8.self)
-            BN_bn2bin(ctx?.convert(), p.baseAddress)
+            if let p = bytes.baseAddress?.assumingMemoryBound(to: UInt8.self) {
+                BN_bn2bin(ctx?.convert(), p)
+            }
         }
         return bytes
     }
