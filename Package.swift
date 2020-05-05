@@ -8,22 +8,14 @@ let package = Package(
     products: [
         // Products define the executables and libraries produced by a package, and make them visible to other packages.
         .library(name: "BigNum", targets: ["BigNum"]),
+        /* This target is used only for symbol mangling. It's added and removed automatically because it emits build warnings. MANGLE_START
+            .library(name: "CBigNumBoringSSL", type: .static, targets: ["CBigNumBoringSSL"]),
+            MANGLE_END */
     ],
-    dependencies: [
-        // Dependencies declare other packages that this package depends on.
-        // .package(url: /* package url */, from: "1.0.0"),
-    ],
+    dependencies: [],
     targets: [
-        .target(name: "BigNum", dependencies: ["CBigNum"]),
-        .target(name: "CBigNum", dependencies: ["CBigNumOpenSSL"]),
-        .systemLibrary(
-            name: "CBigNumOpenSSL",
-            pkgConfig: "openssl",
-            providers: [
-                .apt(["openssl libssl-dev"]),
-                .brew(["openssl"])
-            ]
-        ),
+        .target(name: "BigNum", dependencies: ["CBigNumBoringSSL"]),
+        .target(name: "CBigNumBoringSSL"),
         .testTarget(name: "BigNumTests", dependencies: ["BigNum"]),
     ]
 )

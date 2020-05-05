@@ -237,7 +237,7 @@ final class BigNumTests: XCTestCase {
                 "bfa104f6b797719613aa50eabcdb40fd5457f64861dd71890eba"
             )!
             var g = BigNum(3)
-            for _ in 0..<400 {
+            for _ in 0..<100 {
                 g = g.power(a, modulus: N)
             }
         }
