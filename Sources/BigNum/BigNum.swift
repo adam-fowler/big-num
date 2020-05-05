@@ -9,9 +9,8 @@ import Foundation
 
 /// Swift wrapper class for BIGNUM functions in OpenSSL library
 public final class BigNum {
-    // ctx is an `OpaquePointer` because in OpenSSL 1.1 `BIGNUM` is an incomplete type. Still have to jump
-    // through hoops though because in other builds it is complete type and the compiler complains about
-    // casting to and from an OpaquePointer
+    // ctx is an `OpaquePointer` because CBigNumBoringSSL has been imported as implementation only. Still need
+    // to convert back and forth between `OpaquePointer` and `UnsafeMutablePointer<BIGNUM> though
     internal let ctx: OpaquePointer?
     
     public init() {

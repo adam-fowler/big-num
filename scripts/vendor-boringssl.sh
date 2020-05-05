@@ -38,12 +38,13 @@
 #      a local copy of the BoringSSL sources in Sources/CBigNumBoringSSL.
 #      Any prior contents of Sources/CBigNumBoringSSL will be deleted.
 #
-set -eou pipefail
+set -eu
+#set -eou pipefail
 
 HERE=$(pwd)
 DSTROOT=Sources/CBigNumBoringSSL
-#TMPDIR=$(mktemp -d /tmp/.workingXXXXXX)
-TMPDIR="${HERE}/boringssl"
+TMPDIR=$(mktemp -d /tmp/.workingXXXXXX)
+#TMPDIR="${HERE}/.boringssl"
 SRCROOT="${TMPDIR}/src/boringssl.googlesource.com/boringssl"
 CROSS_COMPILE_TARGET_LOCATION="/Library/Developer/Destinations"
 CROSS_COMPILE_VERSION="5.1.1"
@@ -52,9 +53,8 @@ CROSS_COMPILE_VERSION="5.1.1"
 # and BoringSSL.
 function namespace_inlines {
     echo "NAMESPACE inlines"
-    echo "STACKS"
     # Pull out all STACK_OF functions.
-    STACKS=$(grep --no-filename -rE -e "DEFINE_(SPECIAL_)?STACK_OF\([A-Z_0-9a-z]+\)" -e "DEFINE_NAMED_STACK_OF\([A-Z_0-9a-z]+, +[A-Z_0-9a-z:]+\)" "$1/"* | grep -v '//' | grep -v '#' | gsed -e 's/DEFINE_\(SPECIAL_\)\?STACK_OF(\(.*\))/\2/' -e 's/DEFINE_NAMED_STACK_OF(\(.*\), .*)/\1/')
+    STACKS=$(grep --no-filename -rE -e "DEFINE_(SPECIAL_)?STACK_OF\([A-Z_0-9a-z]+\)" -e "DEFINE_NAMED_STACK_OF\([A-Z_0-9a-z]+, +[A-Z_0-9a-z:]+\)" "$1/crypto/"* | grep -v '//' | grep -v '#' | gsed -e 's/DEFINE_\(SPECIAL_\)\?STACK_OF(\(.*\))/\2/' -e 's/DEFINE_NAMED_STACK_OF(\(.*\), .*)/\1/')
     STACK_FUNCTIONS=("call_free_func" "call_copy_func" "call_cmp_func" "new" "new_null" "num" "zero" "value" "set" "free" "pop_free" "insert" "delete" "delete_ptr" "find" "shift" "push" "pop" "dup" "sort" "is_sorted" "set_cmp_func" "deep_copy")
 
     for s in $STACKS; do
@@ -63,18 +63,15 @@ function namespace_inlines {
         done
     done
 
-    echo "LHASHES"
     # Now pull out all LHASH_OF functions.
-    LHASHES=$(grep --no-filename -rE "DEFINE_LHASH_OF\([A-Z_0-9a-z]+\)" "$1/"* | grep -v '//' | grep -v '#' | grep -v '\\$' | gsed 's/DEFINE_LHASH_OF(\(.*\))/\1/')
+    LHASHES=$(grep --no-filename -rE "DEFINE_LHASH_OF\([A-Z_0-9a-z]+\)" "$1/crypto/"* | grep -v '//' | grep -v '#' | grep -v '\\$' | gsed 's/DEFINE_LHASH_OF(\(.*\))/\1/')
     LHASH_FUNCTIONS=("call_cmp_func" "call_hash_func" "new" "free" "num_items" "retrieve" "call_cmp_key" "retrieve_key" "insert" "delete" "call_doall" "call_doall_arg" "doall" "doall_arg")
 
-    echo $LHASHES
     for l in $LHASHES; do
         for f in "${LHASH_FUNCTIONS[@]}"; do
             echo "#define lh_${l}_${f} BORINGSSL_ADD_PREFIX(BORINGSSL_PREFIX, lh_${l}_${f})" >> "$1/include/openssl/boringssl_prefix_symbols.h"
         done
     done
-    echo "DONE"
 }
 
 
@@ -132,7 +129,7 @@ function mangle_symbols {
     do
         $sed -i '1 i #define BORINGSSL_PREFIX CBigNumBoringSSL' "$assembly_file"
     done
-    #namespace_inlines "$DSTROOT"
+    namespace_inlines "$DSTROOT"
 }
 
 case "$(uname -s)" in
@@ -159,8 +156,8 @@ rm -rf $DSTROOT/third_party
 rm -rf $DSTROOT/err_data.c
 
 echo "CLONING boringssl"
-#mkdir -p "$SRCROOT"
-#git clone https://boringssl.googlesource.com/boringssl "$SRCROOT"
+mkdir -p "$SRCROOT"
+git clone https://boringssl.googlesource.com/boringssl "$SRCROOT"
 cd "$SRCROOT"
 BORINGSSL_REVISION=$(git rev-parse HEAD)
 cd "$HERE"
@@ -181,7 +178,32 @@ echo "GENERATING assembly helpers"
 )
 
 PATTERNS=(
-'include/openssl/*.h'
+'include/openssl/aead.h'
+'include/openssl/aes.h'
+'include/openssl/arm_arch.h'
+'include/openssl/asn1.h'
+'include/openssl/base.h'
+'include/openssl/bio.h'
+'include/openssl/bn.h'
+'include/openssl/buf.h'
+'include/openssl/buffer.h'
+'include/openssl/bytestring.h'
+'include/openssl/chacha.h'
+'include/openssl/cipher.h'
+'include/openssl/cpu.h'
+'include/openssl/crypto.h'
+'include/openssl/err.h'
+'include/openssl/ex_data.h'
+'include/openssl/is_boringssl.h'
+'include/openssl/opensslconf.h'
+'include/openssl/mem.h'
+'include/openssl/nid.h'
+'include/openssl/rand.h'
+'include/openssl/sha.h'
+'include/openssl/span.h'
+'include/openssl/stack.h'
+'include/openssl/thread.h'
+'include/openssl/type_check.h'
 'crypto/*.h'
 'crypto/*.c'
 'crypto/bio/*.h'
@@ -246,15 +268,8 @@ echo "GENERATING err_data.c"
 echo "DELETING crypto/fipsmodule/bcm.c"
 rm -f $DSTROOT/crypto/fipsmodule/bcm.c
 
-echo "FIXING missing include"
-perl -pi -e '$_ .= qq(\n#include <openssl/cpu.h>\n) if /#include <openssl\/err.h>/' "$DSTROOT/crypto/fipsmodule/ec/p256-x86_64.c"
-
-#echo "REMOVING libssl"
-#(
-#    cd "$DSTROOT"
-#    rm "include/openssl/ssl.h" "include/openssl/srtp.h" "include/openssl/ssl3.h" "include/openssl/tls1.h"
-#    rm -rf "ssl"
-#)
+#echo "FIXING missing include"
+#perl -pi -e '$_ .= qq(\n#include <openssl/cpu.h>\n) if /#include <openssl\/err.h>/' "$DSTROOT/crypto/fipsmodule/ec/p256-x86_64.c"
 
 mangle_symbols
 
@@ -302,25 +317,14 @@ git apply "${HERE}/scripts/patch-2-arm-arch.patch"
 # We need BoringSSL to be modularised
 echo "MODULARISING BoringSSL"
 cat << EOF > "$DSTROOT/include/CBigNumBoringSSL.h"
-//===----------------------------------------------------------------------===//
-//
-// This source file is part of the SwitCrypto open source project
-//
-// Copyright (c) 2019 Apple Inc. and the SwiftCrypto project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE.txt for license information
-// See CONTRIBUTORS.md for the list of SwiftCrypto project authors
-//
-// SPDX-License-Identifier: Apache-2.0
-//
-//===----------------------------------------------------------------------===//
-#ifndef C_CRYPTO_BORINGSSL_H
-#define C_CRYPTO_BORINGSSL_H
+#ifndef C_BIGNUM_BORINGSSL_H
+#define C_BIGNUM_BORINGSSL_H
 
+#include "CBigNumBoringSSL_base.h"
+#include "CBigNumBoringSSL_bio.h"
 #include "CBigNumBoringSSL_bn.h"
 
-#endif  // C_CRYPTO_BORINGSSL_H
+#endif  // C_BIGNUM_BORINGSSL_H
 EOF
 
 echo "RECORDING BoringSSL revision"
@@ -328,4 +332,4 @@ $sed -i -e "s/BoringSSL Commit: [0-9a-f]\+/BoringSSL Commit: ${BORINGSSL_REVISIO
 echo "This directory is derived from BoringSSL cloned from https://boringssl.googlesource.com/boringssl at revision ${BORINGSSL_REVISION}" > "$DSTROOT/hash.txt"
 
 echo "CLEANING temporary directory"
-#rm -rf "${TMPDIR}"
+rm -rf "${TMPDIR}"
