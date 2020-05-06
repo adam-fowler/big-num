@@ -43,8 +43,8 @@ set -eu
 
 HERE=$(pwd)
 DSTROOT=Sources/CBigNumBoringSSL
-TMPDIR=$(mktemp -d /tmp/.workingXXXXXX)
-#TMPDIR="${HERE}/.boringssl"
+#TMPDIR=$(mktemp -d /tmp/.workingXXXXXX)
+TMPDIR="${HERE}/.boringssl"
 SRCROOT="${TMPDIR}/src/boringssl.googlesource.com/boringssl"
 CROSS_COMPILE_TARGET_LOCATION="/Library/Developer/Destinations"
 CROSS_COMPILE_VERSION="5.1.1"
@@ -156,8 +156,8 @@ rm -rf $DSTROOT/third_party
 rm -rf $DSTROOT/err_data.c
 
 echo "CLONING boringssl"
-mkdir -p "$SRCROOT"
-git clone https://boringssl.googlesource.com/boringssl "$SRCROOT"
+#mkdir -p "$SRCROOT"
+#git clone https://boringssl.googlesource.com/boringssl "$SRCROOT"
 cd "$SRCROOT"
 BORINGSSL_REVISION=$(git rev-parse HEAD)
 cd "$HERE"
@@ -206,16 +206,14 @@ PATTERNS=(
 'include/openssl/type_check.h'
 'crypto/*.h'
 'crypto/*.c'
-'crypto/bio/*.h'
-'crypto/bio/*.c'
+'crypto/bio/bio.c'
+'crypto/bio/file.c'
 'crypto/bn_extra/convert.c'
-'crypto/buf/*.c'
 'crypto/bytestring/*.h'
 'crypto/bytestring/*.c'
 'crypto/err/*.c'
 'crypto/err/*.h'
 'crypto/fipsmodule/*.h'
-'crypto/fipsmodule/*.c'
 'crypto/fipsmodule/*.S'
 'crypto/fipsmodule/bn/*.h'
 'crypto/fipsmodule/bn/*.c'
@@ -320,9 +318,11 @@ cat << EOF > "$DSTROOT/include/CBigNumBoringSSL.h"
 #ifndef C_BIGNUM_BORINGSSL_H
 #define C_BIGNUM_BORINGSSL_H
 
-#include "CBigNumBoringSSL_base.h"
 #include "CBigNumBoringSSL_bio.h"
 #include "CBigNumBoringSSL_bn.h"
+#include "CBigNumBoringSSL_bytestring.h"
+#include "CBigNumBoringSSL_err.h"
+#include "CBigNumBoringSSL_rand.h"
 
 #endif  // C_BIGNUM_BORINGSSL_H
 EOF
@@ -332,4 +332,4 @@ $sed -i -e "s/BoringSSL Commit: [0-9a-f]\+/BoringSSL Commit: ${BORINGSSL_REVISIO
 echo "This directory is derived from BoringSSL cloned from https://boringssl.googlesource.com/boringssl at revision ${BORINGSSL_REVISION}" > "$DSTROOT/hash.txt"
 
 echo "CLEANING temporary directory"
-rm -rf "${TMPDIR}"
+#rm -rf "${TMPDIR}"
