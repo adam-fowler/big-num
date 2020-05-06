@@ -59,4 +59,4 @@ A hashed version of S can be sent back to the server and the server can use that
 
 ## Compatibility
 
-BigNum works on both macOS and Linux. It requires Swift 5.0. Unfortunately because BigNum makes use of the OpenSSL library BigNum is not available on iOS.
+BigNum uses a vendored cutdown version of BoringSSL (Google's version of OpenSSL) so doesn't require a separate OpenSSL library. This means it can be run on iOS and on macOS and Linux platforms without requiring a separate library to be installed. 
