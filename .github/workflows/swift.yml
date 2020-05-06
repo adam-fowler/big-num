@@ -13,12 +13,12 @@ jobs:
       run: swift build
     - name: Run tests
       run: swift test
-      
+
   linux:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        tag: ['5.0', '5.1', '5.2']
+        tag: ['5.1', '5.2']
     container:
       image: swift:${{ matrix.tag }}
     steps:

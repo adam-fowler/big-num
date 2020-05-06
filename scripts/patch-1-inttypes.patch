@@ -1,0 +1,13 @@
+diff --git a/Sources/CBigNumBoringSSL/include/CBigNumBoringSSL_bn.h b/Sources/CBigNumBoringSSL/include/CBigNumBoringSSL_bn.h
+index c86c1ef..7013140 100644
+--- a/Sources/CBigNumBoringSSL/include/CBigNumBoringSSL_bn.h
++++ b/Sources/CBigNumBoringSSL/include/CBigNumBoringSSL_bn.h
+@@ -126,7 +126,7 @@
+ #include "CBigNumBoringSSL_base.h"
+ #include "CBigNumBoringSSL_thread.h"
+
+-#include <inttypes.h>  // for PRIu64 and friends
++#include <sys/types.h>
+ #include <stdio.h>  // for FILE*
+
+ #if defined(__cplusplus)
