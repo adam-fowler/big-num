@@ -33,30 +33,22 @@
 %xdefine _BIO_clear_retry_flags _ %+ BORINGSSL_PREFIX %+ _BIO_clear_retry_flags
 %xdefine _BIO_copy_next_retry _ %+ BORINGSSL_PREFIX %+ _BIO_copy_next_retry
 %xdefine _BIO_ctrl _ %+ BORINGSSL_PREFIX %+ _BIO_ctrl
-%xdefine _BIO_ctrl_get_read_request _ %+ BORINGSSL_PREFIX %+ _BIO_ctrl_get_read_request
-%xdefine _BIO_ctrl_get_write_guarantee _ %+ BORINGSSL_PREFIX %+ _BIO_ctrl_get_write_guarantee
 %xdefine _BIO_ctrl_pending _ %+ BORINGSSL_PREFIX %+ _BIO_ctrl_pending
-%xdefine _BIO_do_connect _ %+ BORINGSSL_PREFIX %+ _BIO_do_connect
 %xdefine _BIO_eof _ %+ BORINGSSL_PREFIX %+ _BIO_eof
 %xdefine _BIO_find_type _ %+ BORINGSSL_PREFIX %+ _BIO_find_type
 %xdefine _BIO_flush _ %+ BORINGSSL_PREFIX %+ _BIO_flush
 %xdefine _BIO_free _ %+ BORINGSSL_PREFIX %+ _BIO_free
 %xdefine _BIO_free_all _ %+ BORINGSSL_PREFIX %+ _BIO_free_all
 %xdefine _BIO_get_data _ %+ BORINGSSL_PREFIX %+ _BIO_get_data
-%xdefine _BIO_get_fd _ %+ BORINGSSL_PREFIX %+ _BIO_get_fd
 %xdefine _BIO_get_fp _ %+ BORINGSSL_PREFIX %+ _BIO_get_fp
 %xdefine _BIO_get_init _ %+ BORINGSSL_PREFIX %+ _BIO_get_init
-%xdefine _BIO_get_mem_data _ %+ BORINGSSL_PREFIX %+ _BIO_get_mem_data
-%xdefine _BIO_get_mem_ptr _ %+ BORINGSSL_PREFIX %+ _BIO_get_mem_ptr
 %xdefine _BIO_get_new_index _ %+ BORINGSSL_PREFIX %+ _BIO_get_new_index
 %xdefine _BIO_get_retry_flags _ %+ BORINGSSL_PREFIX %+ _BIO_get_retry_flags
 %xdefine _BIO_get_retry_reason _ %+ BORINGSSL_PREFIX %+ _BIO_get_retry_reason
 %xdefine _BIO_get_shutdown _ %+ BORINGSSL_PREFIX %+ _BIO_get_shutdown
 %xdefine _BIO_gets _ %+ BORINGSSL_PREFIX %+ _BIO_gets
-%xdefine _BIO_hexdump _ %+ BORINGSSL_PREFIX %+ _BIO_hexdump
 %xdefine _BIO_indent _ %+ BORINGSSL_PREFIX %+ _BIO_indent
 %xdefine _BIO_int_ctrl _ %+ BORINGSSL_PREFIX %+ _BIO_int_ctrl
-%xdefine _BIO_mem_contents _ %+ BORINGSSL_PREFIX %+ _BIO_mem_contents
 %xdefine _BIO_meth_free _ %+ BORINGSSL_PREFIX %+ _BIO_meth_free
 %xdefine _BIO_meth_new _ %+ BORINGSSL_PREFIX %+ _BIO_meth_new
 %xdefine _BIO_meth_set_create _ %+ BORINGSSL_PREFIX %+ _BIO_meth_set_create
@@ -68,19 +60,13 @@
 %xdefine _BIO_meth_set_write _ %+ BORINGSSL_PREFIX %+ _BIO_meth_set_write
 %xdefine _BIO_method_type _ %+ BORINGSSL_PREFIX %+ _BIO_method_type
 %xdefine _BIO_new _ %+ BORINGSSL_PREFIX %+ _BIO_new
-%xdefine _BIO_new_bio_pair _ %+ BORINGSSL_PREFIX %+ _BIO_new_bio_pair
-%xdefine _BIO_new_connect _ %+ BORINGSSL_PREFIX %+ _BIO_new_connect
-%xdefine _BIO_new_fd _ %+ BORINGSSL_PREFIX %+ _BIO_new_fd
 %xdefine _BIO_new_file _ %+ BORINGSSL_PREFIX %+ _BIO_new_file
 %xdefine _BIO_new_fp _ %+ BORINGSSL_PREFIX %+ _BIO_new_fp
-%xdefine _BIO_new_mem_buf _ %+ BORINGSSL_PREFIX %+ _BIO_new_mem_buf
-%xdefine _BIO_new_socket _ %+ BORINGSSL_PREFIX %+ _BIO_new_socket
 %xdefine _BIO_next _ %+ BORINGSSL_PREFIX %+ _BIO_next
 %xdefine _BIO_number_read _ %+ BORINGSSL_PREFIX %+ _BIO_number_read
 %xdefine _BIO_number_written _ %+ BORINGSSL_PREFIX %+ _BIO_number_written
 %xdefine _BIO_pending _ %+ BORINGSSL_PREFIX %+ _BIO_pending
 %xdefine _BIO_pop _ %+ BORINGSSL_PREFIX %+ _BIO_pop
-%xdefine _BIO_printf _ %+ BORINGSSL_PREFIX %+ _BIO_printf
 %xdefine _BIO_ptr_ctrl _ %+ BORINGSSL_PREFIX %+ _BIO_ptr_ctrl
 %xdefine _BIO_push _ %+ BORINGSSL_PREFIX %+ _BIO_push
 %xdefine _BIO_puts _ %+ BORINGSSL_PREFIX %+ _BIO_puts
@@ -89,23 +75,12 @@
 %xdefine _BIO_read_filename _ %+ BORINGSSL_PREFIX %+ _BIO_read_filename
 %xdefine _BIO_reset _ %+ BORINGSSL_PREFIX %+ _BIO_reset
 %xdefine _BIO_rw_filename _ %+ BORINGSSL_PREFIX %+ _BIO_rw_filename
-%xdefine _BIO_s_connect _ %+ BORINGSSL_PREFIX %+ _BIO_s_connect
-%xdefine _BIO_s_fd _ %+ BORINGSSL_PREFIX %+ _BIO_s_fd
 %xdefine _BIO_s_file _ %+ BORINGSSL_PREFIX %+ _BIO_s_file
-%xdefine _BIO_s_mem _ %+ BORINGSSL_PREFIX %+ _BIO_s_mem
-%xdefine _BIO_s_socket _ %+ BORINGSSL_PREFIX %+ _BIO_s_socket
 %xdefine _BIO_set_close _ %+ BORINGSSL_PREFIX %+ _BIO_set_close
-%xdefine _BIO_set_conn_hostname _ %+ BORINGSSL_PREFIX %+ _BIO_set_conn_hostname
-%xdefine _BIO_set_conn_int_port _ %+ BORINGSSL_PREFIX %+ _BIO_set_conn_int_port
-%xdefine _BIO_set_conn_port _ %+ BORINGSSL_PREFIX %+ _BIO_set_conn_port
 %xdefine _BIO_set_data _ %+ BORINGSSL_PREFIX %+ _BIO_set_data
-%xdefine _BIO_set_fd _ %+ BORINGSSL_PREFIX %+ _BIO_set_fd
 %xdefine _BIO_set_flags _ %+ BORINGSSL_PREFIX %+ _BIO_set_flags
 %xdefine _BIO_set_fp _ %+ BORINGSSL_PREFIX %+ _BIO_set_fp
 %xdefine _BIO_set_init _ %+ BORINGSSL_PREFIX %+ _BIO_set_init
-%xdefine _BIO_set_mem_buf _ %+ BORINGSSL_PREFIX %+ _BIO_set_mem_buf
-%xdefine _BIO_set_mem_eof_return _ %+ BORINGSSL_PREFIX %+ _BIO_set_mem_eof_return
-%xdefine _BIO_set_nbio _ %+ BORINGSSL_PREFIX %+ _BIO_set_nbio
 %xdefine _BIO_set_retry_read _ %+ BORINGSSL_PREFIX %+ _BIO_set_retry_read
 %xdefine _BIO_set_retry_special _ %+ BORINGSSL_PREFIX %+ _BIO_set_retry_special
 %xdefine _BIO_set_retry_write _ %+ BORINGSSL_PREFIX %+ _BIO_set_retry_write
@@ -115,7 +90,6 @@
 %xdefine _BIO_should_read _ %+ BORINGSSL_PREFIX %+ _BIO_should_read
 %xdefine _BIO_should_retry _ %+ BORINGSSL_PREFIX %+ _BIO_should_retry
 %xdefine _BIO_should_write _ %+ BORINGSSL_PREFIX %+ _BIO_should_write
-%xdefine _BIO_shutdown_wr _ %+ BORINGSSL_PREFIX %+ _BIO_shutdown_wr
 %xdefine _BIO_snprintf _ %+ BORINGSSL_PREFIX %+ _BIO_snprintf
 %xdefine _BIO_test_flags _ %+ BORINGSSL_PREFIX %+ _BIO_test_flags
 %xdefine _BIO_up_ref _ %+ BORINGSSL_PREFIX %+ _BIO_up_ref
@@ -243,18 +217,6 @@
 %xdefine _BN_usub _ %+ BORINGSSL_PREFIX %+ _BN_usub
 %xdefine _BN_value_one _ %+ BORINGSSL_PREFIX %+ _BN_value_one
 %xdefine _BN_zero _ %+ BORINGSSL_PREFIX %+ _BN_zero
-%xdefine _BUF_MEM_append _ %+ BORINGSSL_PREFIX %+ _BUF_MEM_append
-%xdefine _BUF_MEM_free _ %+ BORINGSSL_PREFIX %+ _BUF_MEM_free
-%xdefine _BUF_MEM_grow _ %+ BORINGSSL_PREFIX %+ _BUF_MEM_grow
-%xdefine _BUF_MEM_grow_clean _ %+ BORINGSSL_PREFIX %+ _BUF_MEM_grow_clean
-%xdefine _BUF_MEM_new _ %+ BORINGSSL_PREFIX %+ _BUF_MEM_new
-%xdefine _BUF_MEM_reserve _ %+ BORINGSSL_PREFIX %+ _BUF_MEM_reserve
-%xdefine _BUF_memdup _ %+ BORINGSSL_PREFIX %+ _BUF_memdup
-%xdefine _BUF_strdup _ %+ BORINGSSL_PREFIX %+ _BUF_strdup
-%xdefine _BUF_strlcat _ %+ BORINGSSL_PREFIX %+ _BUF_strlcat
-%xdefine _BUF_strlcpy _ %+ BORINGSSL_PREFIX %+ _BUF_strlcpy
-%xdefine _BUF_strndup _ %+ BORINGSSL_PREFIX %+ _BUF_strndup
-%xdefine _BUF_strnlen _ %+ BORINGSSL_PREFIX %+ _BUF_strnlen
 %xdefine _CBB_add_asn1 _ %+ BORINGSSL_PREFIX %+ _CBB_add_asn1
 %xdefine _CBB_add_asn1_bool _ %+ BORINGSSL_PREFIX %+ _CBB_add_asn1_bool
 %xdefine _CBB_add_asn1_int64 _ %+ BORINGSSL_PREFIX %+ _CBB_add_asn1_int64
@@ -500,8 +462,6 @@
 %xdefine _EVP_aes_256_gcm _ %+ BORINGSSL_PREFIX %+ _EVP_aes_256_gcm
 %xdefine _EVP_aes_256_ofb _ %+ BORINGSSL_PREFIX %+ _EVP_aes_256_ofb
 %xdefine _EVP_has_aes_hardware _ %+ BORINGSSL_PREFIX %+ _EVP_has_aes_hardware
-%xdefine _FIPS_mode _ %+ BORINGSSL_PREFIX %+ _FIPS_mode
-%xdefine _FIPS_mode_set _ %+ BORINGSSL_PREFIX %+ _FIPS_mode_set
 %xdefine _OPENSSL_cleanse _ %+ BORINGSSL_PREFIX %+ _OPENSSL_cleanse
 %xdefine _OPENSSL_cleanup _ %+ BORINGSSL_PREFIX %+ _OPENSSL_cleanup
 %xdefine _OPENSSL_clear_free _ %+ BORINGSSL_PREFIX %+ _OPENSSL_clear_free
@@ -562,11 +522,6 @@
 %xdefine _aesni_gcm_decrypt _ %+ BORINGSSL_PREFIX %+ _aesni_gcm_decrypt
 %xdefine _aesni_gcm_encrypt _ %+ BORINGSSL_PREFIX %+ _aesni_gcm_encrypt
 %xdefine _beeu_mod_inverse_vartime _ %+ BORINGSSL_PREFIX %+ _beeu_mod_inverse_vartime
-%xdefine _bio_clear_socket_error _ %+ BORINGSSL_PREFIX %+ _bio_clear_socket_error
-%xdefine _bio_fd_should_retry _ %+ BORINGSSL_PREFIX %+ _bio_fd_should_retry
-%xdefine _bio_ip_and_port_to_socket_and_addr _ %+ BORINGSSL_PREFIX %+ _bio_ip_and_port_to_socket_and_addr
-%xdefine _bio_sock_error _ %+ BORINGSSL_PREFIX %+ _bio_sock_error
-%xdefine _bio_socket_nbio _ %+ BORINGSSL_PREFIX %+ _bio_socket_nbio
 %xdefine _bn_abs_sub_consttime _ %+ BORINGSSL_PREFIX %+ _bn_abs_sub_consttime
 %xdefine _bn_add_words _ %+ BORINGSSL_PREFIX %+ _bn_add_words
 %xdefine _bn_copy_words _ %+ BORINGSSL_PREFIX %+ _bn_copy_words
@@ -730,30 +685,22 @@
 %xdefine BIO_clear_retry_flags BORINGSSL_PREFIX %+ _BIO_clear_retry_flags
 %xdefine BIO_copy_next_retry BORINGSSL_PREFIX %+ _BIO_copy_next_retry
 %xdefine BIO_ctrl BORINGSSL_PREFIX %+ _BIO_ctrl
-%xdefine BIO_ctrl_get_read_request BORINGSSL_PREFIX %+ _BIO_ctrl_get_read_request
-%xdefine BIO_ctrl_get_write_guarantee BORINGSSL_PREFIX %+ _BIO_ctrl_get_write_guarantee
 %xdefine BIO_ctrl_pending BORINGSSL_PREFIX %+ _BIO_ctrl_pending
-%xdefine BIO_do_connect BORINGSSL_PREFIX %+ _BIO_do_connect
 %xdefine BIO_eof BORINGSSL_PREFIX %+ _BIO_eof
 %xdefine BIO_find_type BORINGSSL_PREFIX %+ _BIO_find_type
 %xdefine BIO_flush BORINGSSL_PREFIX %+ _BIO_flush
 %xdefine BIO_free BORINGSSL_PREFIX %+ _BIO_free
 %xdefine BIO_free_all BORINGSSL_PREFIX %+ _BIO_free_all
 %xdefine BIO_get_data BORINGSSL_PREFIX %+ _BIO_get_data
-%xdefine BIO_get_fd BORINGSSL_PREFIX %+ _BIO_get_fd
 %xdefine BIO_get_fp BORINGSSL_PREFIX %+ _BIO_get_fp
 %xdefine BIO_get_init BORINGSSL_PREFIX %+ _BIO_get_init
-%xdefine BIO_get_mem_data BORINGSSL_PREFIX %+ _BIO_get_mem_data
-%xdefine BIO_get_mem_ptr BORINGSSL_PREFIX %+ _BIO_get_mem_ptr
 %xdefine BIO_get_new_index BORINGSSL_PREFIX %+ _BIO_get_new_index
 %xdefine BIO_get_retry_flags BORINGSSL_PREFIX %+ _BIO_get_retry_flags
 %xdefine BIO_get_retry_reason BORINGSSL_PREFIX %+ _BIO_get_retry_reason
 %xdefine BIO_get_shutdown BORINGSSL_PREFIX %+ _BIO_get_shutdown
 %xdefine BIO_gets BORINGSSL_PREFIX %+ _BIO_gets
-%xdefine BIO_hexdump BORINGSSL_PREFIX %+ _BIO_hexdump
 %xdefine BIO_indent BORINGSSL_PREFIX %+ _BIO_indent
 %xdefine BIO_int_ctrl BORINGSSL_PREFIX %+ _BIO_int_ctrl
-%xdefine BIO_mem_contents BORINGSSL_PREFIX %+ _BIO_mem_contents
 %xdefine BIO_meth_free BORINGSSL_PREFIX %+ _BIO_meth_free
 %xdefine BIO_meth_new BORINGSSL_PREFIX %+ _BIO_meth_new
 %xdefine BIO_meth_set_create BORINGSSL_PREFIX %+ _BIO_meth_set_create
@@ -765,19 +712,13 @@
 %xdefine BIO_meth_set_write BORINGSSL_PREFIX %+ _BIO_meth_set_write
 %xdefine BIO_method_type BORINGSSL_PREFIX %+ _BIO_method_type
 %xdefine BIO_new BORINGSSL_PREFIX %+ _BIO_new
-%xdefine BIO_new_bio_pair BORINGSSL_PREFIX %+ _BIO_new_bio_pair
-%xdefine BIO_new_connect BORINGSSL_PREFIX %+ _BIO_new_connect
-%xdefine BIO_new_fd BORINGSSL_PREFIX %+ _BIO_new_fd
 %xdefine BIO_new_file BORINGSSL_PREFIX %+ _BIO_new_file
 %xdefine BIO_new_fp BORINGSSL_PREFIX %+ _BIO_new_fp
-%xdefine BIO_new_mem_buf BORINGSSL_PREFIX %+ _BIO_new_mem_buf
-%xdefine BIO_new_socket BORINGSSL_PREFIX %+ _BIO_new_socket
 %xdefine BIO_next BORINGSSL_PREFIX %+ _BIO_next
 %xdefine BIO_number_read BORINGSSL_PREFIX %+ _BIO_number_read
 %xdefine BIO_number_written BORINGSSL_PREFIX %+ _BIO_number_written
 %xdefine BIO_pending BORINGSSL_PREFIX %+ _BIO_pending
 %xdefine BIO_pop BORINGSSL_PREFIX %+ _BIO_pop
-%xdefine BIO_printf BORINGSSL_PREFIX %+ _BIO_printf
 %xdefine BIO_ptr_ctrl BORINGSSL_PREFIX %+ _BIO_ptr_ctrl
 %xdefine BIO_push BORINGSSL_PREFIX %+ _BIO_push
 %xdefine BIO_puts BORINGSSL_PREFIX %+ _BIO_puts
@@ -786,23 +727,12 @@
 %xdefine BIO_read_filename BORINGSSL_PREFIX %+ _BIO_read_filename
 %xdefine BIO_reset BORINGSSL_PREFIX %+ _BIO_reset
 %xdefine BIO_rw_filename BORINGSSL_PREFIX %+ _BIO_rw_filename
-%xdefine BIO_s_connect BORINGSSL_PREFIX %+ _BIO_s_connect
-%xdefine BIO_s_fd BORINGSSL_PREFIX %+ _BIO_s_fd
 %xdefine BIO_s_file BORINGSSL_PREFIX %+ _BIO_s_file
-%xdefine BIO_s_mem BORINGSSL_PREFIX %+ _BIO_s_mem
-%xdefine BIO_s_socket BORINGSSL_PREFIX %+ _BIO_s_socket
 %xdefine BIO_set_close BORINGSSL_PREFIX %+ _BIO_set_close
-%xdefine BIO_set_conn_hostname BORINGSSL_PREFIX %+ _BIO_set_conn_hostname
-%xdefine BIO_set_conn_int_port BORINGSSL_PREFIX %+ _BIO_set_conn_int_port
-%xdefine BIO_set_conn_port BORINGSSL_PREFIX %+ _BIO_set_conn_port
 %xdefine BIO_set_data BORINGSSL_PREFIX %+ _BIO_set_data
-%xdefine BIO_set_fd BORINGSSL_PREFIX %+ _BIO_set_fd
 %xdefine BIO_set_flags BORINGSSL_PREFIX %+ _BIO_set_flags
 %xdefine BIO_set_fp BORINGSSL_PREFIX %+ _BIO_set_fp
 %xdefine BIO_set_init BORINGSSL_PREFIX %+ _BIO_set_init
-%xdefine BIO_set_mem_buf BORINGSSL_PREFIX %+ _BIO_set_mem_buf
-%xdefine BIO_set_mem_eof_return BORINGSSL_PREFIX %+ _BIO_set_mem_eof_return
-%xdefine BIO_set_nbio BORINGSSL_PREFIX %+ _BIO_set_nbio
 %xdefine BIO_set_retry_read BORINGSSL_PREFIX %+ _BIO_set_retry_read
 %xdefine BIO_set_retry_special BORINGSSL_PREFIX %+ _BIO_set_retry_special
 %xdefine BIO_set_retry_write BORINGSSL_PREFIX %+ _BIO_set_retry_write
@@ -812,7 +742,6 @@
 %xdefine BIO_should_read BORINGSSL_PREFIX %+ _BIO_should_read
 %xdefine BIO_should_retry BORINGSSL_PREFIX %+ _BIO_should_retry
 %xdefine BIO_should_write BORINGSSL_PREFIX %+ _BIO_should_write
-%xdefine BIO_shutdown_wr BORINGSSL_PREFIX %+ _BIO_shutdown_wr
 %xdefine BIO_snprintf BORINGSSL_PREFIX %+ _BIO_snprintf
 %xdefine BIO_test_flags BORINGSSL_PREFIX %+ _BIO_test_flags
 %xdefine BIO_up_ref BORINGSSL_PREFIX %+ _BIO_up_ref
@@ -940,18 +869,6 @@
 %xdefine BN_usub BORINGSSL_PREFIX %+ _BN_usub
 %xdefine BN_value_one BORINGSSL_PREFIX %+ _BN_value_one
 %xdefine BN_zero BORINGSSL_PREFIX %+ _BN_zero
-%xdefine BUF_MEM_append BORINGSSL_PREFIX %+ _BUF_MEM_append
-%xdefine BUF_MEM_free BORINGSSL_PREFIX %+ _BUF_MEM_free
-%xdefine BUF_MEM_grow BORINGSSL_PREFIX %+ _BUF_MEM_grow
-%xdefine BUF_MEM_grow_clean BORINGSSL_PREFIX %+ _BUF_MEM_grow_clean
-%xdefine BUF_MEM_new BORINGSSL_PREFIX %+ _BUF_MEM_new
-%xdefine BUF_MEM_reserve BORINGSSL_PREFIX %+ _BUF_MEM_reserve
-%xdefine BUF_memdup BORINGSSL_PREFIX %+ _BUF_memdup
-%xdefine BUF_strdup BORINGSSL_PREFIX %+ _BUF_strdup
-%xdefine BUF_strlcat BORINGSSL_PREFIX %+ _BUF_strlcat
-%xdefine BUF_strlcpy BORINGSSL_PREFIX %+ _BUF_strlcpy
-%xdefine BUF_strndup BORINGSSL_PREFIX %+ _BUF_strndup
-%xdefine BUF_strnlen BORINGSSL_PREFIX %+ _BUF_strnlen
 %xdefine CBB_add_asn1 BORINGSSL_PREFIX %+ _CBB_add_asn1
 %xdefine CBB_add_asn1_bool BORINGSSL_PREFIX %+ _CBB_add_asn1_bool
 %xdefine CBB_add_asn1_int64 BORINGSSL_PREFIX %+ _CBB_add_asn1_int64
@@ -1197,8 +1114,6 @@
 %xdefine EVP_aes_256_gcm BORINGSSL_PREFIX %+ _EVP_aes_256_gcm
 %xdefine EVP_aes_256_ofb BORINGSSL_PREFIX %+ _EVP_aes_256_ofb
 %xdefine EVP_has_aes_hardware BORINGSSL_PREFIX %+ _EVP_has_aes_hardware
-%xdefine FIPS_mode BORINGSSL_PREFIX %+ _FIPS_mode
-%xdefine FIPS_mode_set BORINGSSL_PREFIX %+ _FIPS_mode_set
 %xdefine OPENSSL_cleanse BORINGSSL_PREFIX %+ _OPENSSL_cleanse
 %xdefine OPENSSL_cleanup BORINGSSL_PREFIX %+ _OPENSSL_cleanup
 %xdefine OPENSSL_clear_free BORINGSSL_PREFIX %+ _OPENSSL_clear_free
@@ -1259,11 +1174,6 @@
 %xdefine aesni_gcm_decrypt BORINGSSL_PREFIX %+ _aesni_gcm_decrypt
 %xdefine aesni_gcm_encrypt BORINGSSL_PREFIX %+ _aesni_gcm_encrypt
 %xdefine beeu_mod_inverse_vartime BORINGSSL_PREFIX %+ _beeu_mod_inverse_vartime
-%xdefine bio_clear_socket_error BORINGSSL_PREFIX %+ _bio_clear_socket_error
-%xdefine bio_fd_should_retry BORINGSSL_PREFIX %+ _bio_fd_should_retry
-%xdefine bio_ip_and_port_to_socket_and_addr BORINGSSL_PREFIX %+ _bio_ip_and_port_to_socket_and_addr
-%xdefine bio_sock_error BORINGSSL_PREFIX %+ _bio_sock_error
-%xdefine bio_socket_nbio BORINGSSL_PREFIX %+ _bio_socket_nbio
 %xdefine bn_abs_sub_consttime BORINGSSL_PREFIX %+ _bn_abs_sub_consttime
 %xdefine bn_add_words BORINGSSL_PREFIX %+ _bn_add_words
 %xdefine bn_copy_words BORINGSSL_PREFIX %+ _bn_copy_words
