@@ -8,6 +8,20 @@ final class BigNumTests: XCTestCase {
         XCTAssertEqual(BigNum("92"), BigNum(hex:"5c"))
     }
     
+    func testDataConversion() {
+        let number = BigNum(14887387467384)
+        let data = number.data
+        let bytes = number.bytes
+        let hex = number.hex
+        let dec = number.dec
+        XCTAssertEqual(BigNum(14887387467384), BigNum("14887387467384"))
+        XCTAssertEqual(BigNum("92"), BigNum(hex:"5c"))
+        XCTAssertEqual(BigNum(bytes: data), number)
+        XCTAssertEqual(BigNum(bytes: bytes), number)
+        XCTAssertEqual(BigNum(hex: hex), number)
+        XCTAssertEqual(BigNum(dec), number)
+    }
+    
     func testBasic() {
         let a = BigNum(13)
         let b = BigNum(105)

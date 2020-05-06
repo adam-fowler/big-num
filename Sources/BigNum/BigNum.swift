@@ -53,20 +53,6 @@ public final class BigNum {
         self.ctx = ctx!.convert()
     }
 
-    @available(*, deprecated, message: "Please user init(bytes:) instead")
-    public init<D: DataProtocol>(data: D) {
-        let ctx = CBigNumBoringSSL_BN_new()
-        if data.withContiguousStorageIfAvailable({bytes in
-            CBigNumBoringSSL_BN_bin2bn(bytes.baseAddress, .init(data.count), ctx)
-        }) == nil {
-            var buffer = UnsafeMutableBufferPointer<UInt8>.allocate(capacity: data.count)
-            data.copyBytes(to: buffer)
-            defer { buffer.deallocate() }
-            CBigNumBoringSSL_BN_bin2bn(buffer.baseAddress, .init(data.count), ctx)
-        }
-        self.ctx = ctx!.convert()
-    }
-    
     deinit {
         CBigNumBoringSSL_BN_free(ctx?.convert())
     }
