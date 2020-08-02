@@ -1,6 +1,6 @@
 # BigNum
 
-BigNum provides a wrapper for the OpenSSL BIGNUM library.
+BigNum provides a Swift wrapper for the BoringSSL BIGNUM library.
 
 It provides most of the standard library functions
 - Basic arithmetic operators (with and without modulus)
