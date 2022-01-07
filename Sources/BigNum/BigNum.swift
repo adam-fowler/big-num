@@ -59,7 +59,7 @@ public final class BigNum {
 
     public var data: Data {
         var data = Data(count: Int((CBigNumBoringSSL_BN_num_bits(ctx?.convert()) + 7) / 8))
-        _ = data.withUnsafeMutableBytes { bytes in
+        data.withUnsafeMutableBytes { bytes in
             if let p = bytes.baseAddress?.assumingMemoryBound(to: UInt8.self) {
                 CBigNumBoringSSL_BN_bn2bin(ctx?.convert(), p)
             }
@@ -69,7 +69,7 @@ public final class BigNum {
 
     public var bytes: [UInt8] {
         var bytes = [UInt8].init(repeating: 0, count: Int((CBigNumBoringSSL_BN_num_bits(ctx?.convert()) + 7) / 8))
-        _ = bytes.withUnsafeMutableBytes { bytes in
+        bytes.withUnsafeMutableBytes { bytes in
             if let p = bytes.baseAddress?.assumingMemoryBound(to: UInt8.self) {
                 CBigNumBoringSSL_BN_bn2bin(ctx?.convert(), p)
             }
