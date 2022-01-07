@@ -47,7 +47,7 @@ DSTROOT=Sources/CBigNumBoringSSL
 TMPDIR="${HERE}/.boringssl"
 SRCROOT="${TMPDIR}/src/boringssl.googlesource.com/boringssl"
 CROSS_COMPILE_TARGET_LOCATION="/Library/Developer/Destinations"
-CROSS_COMPILE_VERSION="5.1.1"
+CROSS_COMPILE_VERSION="5.5.2"
 
 # This function namespaces the awkward inline functions declared in OpenSSL
 # and BoringSSL.
@@ -148,6 +148,17 @@ if ! hash ${sed} 2>/dev/null; then
     exit 43
 fi
 
+CLONE_LATEST=""
+KEEP_TEMP_FOLDER=""
+
+while getopts 'uk:' option
+do
+    case $option in
+        c) CLONE_LATEST=1 ;;
+        k) KEEP_TEMP_FOLDER=1 ;;
+    esac
+done
+
 echo "REMOVING any previously-vendored BoringSSL code"
 rm -rf $DSTROOT/include
 rm -rf $DSTROOT/ssl
@@ -155,9 +166,12 @@ rm -rf $DSTROOT/crypto
 rm -rf $DSTROOT/third_party
 rm -rf $DSTROOT/err_data.c
 
-echo "CLONING boringssl"
-#mkdir -p "$SRCROOT"
-#git clone https://boringssl.googlesource.com/boringssl "$SRCROOT"
+if [ -n "$CLONE_LATEST" ]; then
+    echo "CLONING boringssl"
+    mkdir -p "$SRCROOT"
+    git clone https://boringssl.googlesource.com/boringssl "$SRCROOT"
+fi
+
 cd "$SRCROOT"
 BORINGSSL_REVISION=$(git rev-parse HEAD)
 cd "$HERE"
@@ -337,4 +351,7 @@ $sed -i -e "s/BoringSSL Commit: [0-9a-f]\+/BoringSSL Commit: ${BORINGSSL_REVISIO
 echo "This directory is derived from BoringSSL cloned from https://boringssl.googlesource.com/boringssl at revision ${BORINGSSL_REVISION}" > "$DSTROOT/hash.txt"
 
 echo "CLEANING temporary directory"
-#rm -rf "${TMPDIR}"
+
+if [ -z "$KEEP_TEMP_FOLDER" ]; then
+    rm -rf "${TMPDIR}"
+fi
