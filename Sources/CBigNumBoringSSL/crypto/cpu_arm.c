@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, Google Inc.
+/* Copyright (c) 2014, Google Inc.
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -12,23 +12,27 @@
  * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. */
 
-#include <CBigNumBoringSSL_rand.h>
+#include <CBigNumBoringSSL_cpu.h>
 
-#if defined(OPENSSL_FUCHSIA) && !defined(BORINGSSL_UNSAFE_DETERMINISTIC_MODE)
+#if (defined(OPENSSL_ARM) || defined(OPENSSL_AARCH64)) && \
+    !defined(OPENSSL_STATIC_ARMCAP)
 
-#include <limits.h>
-#include <stdlib.h>
+#include <CBigNumBoringSSL_arm_arch.h>
 
-#include <zircon/syscalls.h>
 
-#include "../fipsmodule/rand/internal.h"
+extern uint32_t OPENSSL_armcap_P;
 
-void CRYPTO_sysrand(uint8_t *out, size_t requested) {
-  zx_cprng_draw(out, requested);
+int CRYPTO_is_NEON_capable_at_runtime(void) {
+  return (OPENSSL_armcap_P & ARMV7_NEON) != 0;
 }
 
-void CRYPTO_sysrand_for_seed(uint8_t *out, size_t requested) {
-  CRYPTO_sysrand(out, requested);
+int CRYPTO_is_ARMv8_AES_capable_at_runtime(void) {
+  return (OPENSSL_armcap_P & ARMV8_AES) != 0;
 }
 
-#endif  // OPENSSL_FUCHSIA && !BORINGSSL_UNSAFE_DETERMINISTIC_MODE
+int CRYPTO_is_ARMv8_PMULL_capable_at_runtime(void) {
+  return (OPENSSL_armcap_P & ARMV8_PMULL) != 0;
+}
+
+#endif  /* (defined(OPENSSL_ARM) || defined(OPENSSL_AARCH64)) &&
+           !defined(OPENSSL_STATIC_ARMCAP) */

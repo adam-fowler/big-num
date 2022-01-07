@@ -16,6 +16,8 @@
 
 #include <CBigNumBoringSSL_cpu.h>
 
+#include "fipsmodule/rand/fork_detect.h"
+#include "fipsmodule/rand/internal.h"
 #include "internal.h"
 
 
@@ -103,6 +105,9 @@ HIDDEN uint32_t OPENSSL_armcap_P =
 #if defined(OPENSSL_STATIC_ARMCAP_PMULL) || defined(__ARM_FEATURE_CRYPTO)
     ARMV8_PMULL |
 #endif
+#if defined(__ARM_FEATURE_SHA512)
+    ARMV8_SHA512 |
+#endif
     0;
 
 #else
@@ -172,6 +177,15 @@ int CRYPTO_has_asm(void) {
 #else
   return 1;
 #endif
+}
+
+void CRYPTO_pre_sandbox_init(void) {
+  // Read from /proc/cpuinfo if needed.
+  CRYPTO_library_init();
+  // Open /dev/urandom if needed.
+  CRYPTO_init_sysrand();
+  // Set up MADV_WIPEONFORK state if needed.
+  CRYPTO_get_fork_generation();
 }
 
 const char *SSLeay_version(int which) { return OpenSSL_version(which); }

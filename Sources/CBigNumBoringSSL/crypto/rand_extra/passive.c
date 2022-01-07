@@ -1,4 +1,4 @@
-/* Copyright (c) 2014, Google Inc.
+/* Copyright (c) 2020, Google Inc.
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -12,27 +12,23 @@
  * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. */
 
-#include <CBigNumBoringSSL_cpu.h>
+#include <CBigNumBoringSSL_base.h>
+#include "../fipsmodule/rand/internal.h"
 
-#if (defined(OPENSSL_ARM) || defined(OPENSSL_AARCH64)) && \
-    !defined(OPENSSL_STATIC_ARMCAP)
+#if defined(BORINGSSL_FIPS)
 
-#include <CBigNumBoringSSL_arm_arch.h>
+// RAND_need_entropy is called by the FIPS module when it has blocked because of
+// a lack of entropy. This signal is used as an indication to feed it more.
+void RAND_need_entropy(size_t bytes_needed) {
+  uint8_t buf[CTR_DRBG_ENTROPY_LEN * BORINGSSL_FIPS_OVERREAD];
+  size_t todo = sizeof(buf);
+  if (todo > bytes_needed) {
+    todo = bytes_needed;
+  }
 
-
-extern uint32_t OPENSSL_armcap_P;
-
-char CRYPTO_is_NEON_capable_at_runtime(void) {
-  return (OPENSSL_armcap_P & ARMV7_NEON) != 0;
+  int used_cpu;
+  CRYPTO_get_seed_entropy(buf, todo, &used_cpu);
+  RAND_load_entropy(buf, todo, used_cpu);
 }
 
-int CRYPTO_is_ARMv8_AES_capable(void) {
-  return (OPENSSL_armcap_P & ARMV8_AES) != 0;
-}
-
-int CRYPTO_is_ARMv8_PMULL_capable(void) {
-  return (OPENSSL_armcap_P & ARMV8_PMULL) != 0;
-}
-
-#endif  /* (defined(OPENSSL_ARM) || defined(OPENSSL_AARCH64)) &&
-           !defined(OPENSSL_STATIC_ARMCAP) */
+#endif  // FIPS

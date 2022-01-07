@@ -658,6 +658,14 @@ struct bn_gencb_st {
   int (*callback)(int event, int n, struct bn_gencb_st *);
 };
 
+// BN_GENCB_new returns a newly-allocated |BN_GENCB| object, or NULL on
+// allocation failure. The result must be released with |BN_GENCB_free| when
+// done.
+OPENSSL_EXPORT BN_GENCB *BN_GENCB_new(void);
+
+// BN_GENCB_free releases memory associated with |callback|.
+OPENSSL_EXPORT void BN_GENCB_free(BN_GENCB *callback);
+
 // BN_GENCB_set configures |callback| to call |f| and sets |callout->arg| to
 // |arg|.
 OPENSSL_EXPORT void BN_GENCB_set(BN_GENCB *callback,
@@ -687,9 +695,9 @@ OPENSSL_EXPORT int BN_generate_prime_ex(BIGNUM *ret, int bits, int safe,
 // BN_prime_checks_for_validation can be used as the |checks| argument to the
 // primarily testing functions when validating an externally-supplied candidate
 // prime. It gives a false positive rate of at most 2^{-128}. (The worst case
-// false positive rate for a single iteration is 1/4, so we perform 32
-// iterations.)
-#define BN_prime_checks_for_validation 32
+// false positive rate for a single iteration is 1/4 per
+// https://eprint.iacr.org/2018/749. (1/4)^64 = 2^{-128}.)
+#define BN_prime_checks_for_validation 64
 
 // BN_prime_checks_for_generation can be used as the |checks| argument to the
 // primality testing functions when generating random primes. It gives a false
