@@ -12,11 +12,11 @@ public final class BigNum {
     // ctx is an `OpaquePointer` because CBigNumBoringSSL has been imported as implementation only. Still need
     // to convert back and forth between `OpaquePointer` and `UnsafeMutablePointer<BIGNUM> though
     internal let ctx: OpaquePointer?
-    
+
     public init() {
-        ctx = CBigNumBoringSSL_BN_new().convert()
+        self.ctx = CBigNumBoringSSL_BN_new().convert()
     }
-    
+
     public init(_ int: Int) {
         let ctx = CBigNumBoringSSL_BN_new()
         withUnsafePointer(to: int.bigEndian) { bytes in
@@ -61,34 +61,34 @@ public final class BigNum {
         var data = Data(count: Int((CBigNumBoringSSL_BN_num_bits(ctx?.convert()) + 7) / 8))
         data.withUnsafeMutableBytes { bytes in
             if let p = bytes.baseAddress?.assumingMemoryBound(to: UInt8.self) {
-                CBigNumBoringSSL_BN_bn2bin(ctx?.convert(), p)
+                CBigNumBoringSSL_BN_bn2bin(self.ctx?.convert(), p)
             }
         }
         return data
     }
 
     public var bytes: [UInt8] {
-        var bytes = [UInt8].init(repeating: 0, count: Int((CBigNumBoringSSL_BN_num_bits(ctx?.convert()) + 7) / 8))
+        var bytes = [UInt8].init(repeating: 0, count: Int((CBigNumBoringSSL_BN_num_bits(self.ctx?.convert()) + 7) / 8))
         bytes.withUnsafeMutableBytes { bytes in
             if let p = bytes.baseAddress?.assumingMemoryBound(to: UInt8.self) {
-                CBigNumBoringSSL_BN_bn2bin(ctx?.convert(), p)
+                CBigNumBoringSSL_BN_bn2bin(self.ctx?.convert(), p)
             }
         }
         return bytes
     }
 
     public var dec: String {
-        return String(validatingUTF8: CBigNumBoringSSL_BN_bn2dec(ctx?.convert()))!
+        return String(validatingUTF8: CBigNumBoringSSL_BN_bn2dec(self.ctx?.convert()))!
     }
 
     public var hex: String {
-        return String(validatingUTF8: CBigNumBoringSSL_BN_bn2hex(ctx?.convert()))!
+        return String(validatingUTF8: CBigNumBoringSSL_BN_bn2hex(self.ctx?.convert()))!
     }
 }
 
 extension BigNum: CustomStringConvertible {
     public var description: String {
-        return dec
+        return self.dec
     }
 }
 
@@ -110,7 +110,7 @@ extension BigNum: ExpressibleByIntegerLiteral {
     }
 }
 
-//MARK: Operations
+// MARK: Operations
 
 extension BigNum {
     static func operation(_ block: (_ result: BigNum) -> Int32) -> BigNum {
@@ -174,40 +174,39 @@ public func << (lhs: BigNum, shift: Int32) -> BigNum {
     }
 }
 
-//MARK: Member Operations
+// MARK: Member Operations
 
 public extension BigNum {
-
     static func += (lhs: inout BigNum, rhs: BigNum) {
         lhs = BigNum.operation {
             CBigNumBoringSSL_BN_add($0.ctx?.convert(), lhs.ctx?.convert(), rhs.ctx?.convert())
         }
     }
-    
+
     static func -= (lhs: inout BigNum, rhs: BigNum) {
         lhs = BigNum.operation {
             CBigNumBoringSSL_BN_sub($0.ctx?.convert(), lhs.ctx?.convert(), rhs.ctx?.convert())
         }
     }
-    
+
     static func *= (lhs: inout BigNum, rhs: BigNum) {
         lhs = BigNum.operationWithCtx {
             CBigNumBoringSSL_BN_mul($0.ctx?.convert(), lhs.ctx?.convert(), rhs.ctx?.convert(), $1)
         }
     }
-    
+
     static func /= (lhs: inout BigNum, rhs: BigNum) {
         lhs = BigNum.operationWithCtx {
             CBigNumBoringSSL_BN_div($0.ctx?.convert(), nil, lhs.ctx?.convert(), rhs.ctx?.convert(), $1)
         }
     }
-    
+
     static func %= (lhs: inout BigNum, rhs: BigNum) {
         lhs = BigNum.operationWithCtx {
             CBigNumBoringSSL_BN_div(nil, $0.ctx?.convert(), lhs.ctx?.convert(), rhs.ctx?.convert(), $1)
         }
     }
-    
+
     /// Returns: (self ** 2)
     func sqr() -> BigNum {
         return BigNum.operationWithCtx {
@@ -221,7 +220,7 @@ public extension BigNum {
             CBigNumBoringSSL_BN_exp($0.ctx?.convert(), self.ctx?.convert(), p.ctx?.convert(), $1)
         }
     }
-    
+
     /// Returns: (self + b) % N
     func add(_ b: BigNum, modulus: BigNum) -> BigNum {
         return BigNum.operationWithCtx {
@@ -256,24 +255,24 @@ public extension BigNum {
             CBigNumBoringSSL_BN_mod_exp($0.ctx?.convert(), self.ctx?.convert(), p.ctx?.convert(), modulus.ctx?.convert(), $1)
         }
     }
-    
+
     /// Return greatest common denominator
     static func gcd(_ first: BigNum, _ second: BigNum) -> BigNum {
-        return operationWithCtx {
+        return self.operationWithCtx {
             CBigNumBoringSSL_BN_gcd($0.ctx?.convert(), first.ctx?.convert(), second.ctx?.convert(), $1)
         }
     }
-    
+
     /// Bitwise operations
 
     func setBit(_ bit: Int32) {
         CBigNumBoringSSL_BN_set_bit(self.ctx?.convert(), bit)
     }
-    
+
     func clearBit(_ bit: Int32) {
         CBigNumBoringSSL_BN_clear_bit(self.ctx?.convert(), bit)
     }
-    
+
     func mask(_ bits: Int32) {
         CBigNumBoringSSL_BN_mask_bits(self.ctx?.convert(), bits)
     }
@@ -286,9 +285,9 @@ public extension BigNum {
     func numBits() -> UInt32 {
         return CBigNumBoringSSL_BN_num_bits(self.ctx?.convert())
     }
-    
+
     /// random number generators
-    
+
     enum Top: Int32 {
         case any = -1
         case topBitSetToOne = 0
@@ -297,39 +296,39 @@ public extension BigNum {
 
     /// return cryptographically strong random number of maximum size defined in bits. random needs seeding prior to be called
     static func random(bits: Int32, top: Top = .any, odd: Bool = false) -> BigNum {
-        return operation {
+        return self.operation {
             CBigNumBoringSSL_BN_rand($0.ctx?.convert(), bits, top.rawValue, odd ? 1 : 0)
         }
     }
-    
+
     /// return pseudo random number of maximum size defined in bits.
     static func psuedo_random(bits: Int32, top: Top = .any, odd: Bool = false) -> BigNum {
-        return operation {
+        return self.operation {
             CBigNumBoringSSL_BN_pseudo_rand($0.ctx?.convert(), bits, top.rawValue, odd ? 1 : 0)
         }
     }
-    
+
     /// return cryptographically strong random number in range (0...max-1). random needs seeding prior to be called
     static func random(max: BigNum) -> BigNum {
-        return operation {
+        return self.operation {
             CBigNumBoringSSL_BN_rand_range($0.ctx?.convert(), max.ctx?.convert())
         }
     }
-    
+
     /// return pseudo random number in range (0..<max)
     static func psuedo_random(max: BigNum) -> BigNum {
-        return operation {
+        return self.operation {
             CBigNumBoringSSL_BN_pseudo_rand_range($0.ctx?.convert(), max.ctx?.convert())
         }
     }
-    
+
     /// prime number generator
     static func generatePrime(bitSize: Int32, safe: Bool, add: BigNum? = nil, remainder: BigNum? = nil) -> BigNum {
-        return operation {
+        return self.operation {
             CBigNumBoringSSL_BN_generate_prime_ex($0.ctx?.convert(), bitSize, safe ? 1 : 0, add?.ctx?.convert(), remainder?.ctx?.convert(), nil)
         }
     }
-    
+
     /// prime number generator
     func isPrime(numChecks: Int32) -> Bool {
         let context = CBigNumBoringSSL_BN_CTX_new()
@@ -357,3 +356,6 @@ extension UnsafeMutablePointer {
     }
 }
 
+#if swift(>=5.6)
+extension BigNum: @unchecked Sendable {}
+#endif
