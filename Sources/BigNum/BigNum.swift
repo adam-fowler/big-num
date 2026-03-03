@@ -36,11 +36,12 @@ public final class BigNum {
     }
 
     public init?(hex: String) {
-        var ctx = CBigNumBoringSSL_BN_new()
-        if CBigNumBoringSSL_BN_hex2bn(&ctx, hex) == 0 {
+        var originalCtx = CBigNumBoringSSL_BN_new()
+        if CBigNumBoringSSL_BN_hex2bn(&originalCtx, hex) == 0 {
+            CBigNumBoringSSL_OPENSSL_free(originalCtx)
             return nil
         }
-        self.ctx = ctx!.convert()
+        self.ctx = originalCtx!.convert()
     }
 
     public init<D: ContiguousBytes>(bytes: D) {
@@ -78,11 +79,15 @@ public final class BigNum {
     }
 
     public var dec: String {
-        return String(validatingUTF8: CBigNumBoringSSL_BN_bn2dec(self.ctx?.convert()))!
+        let cString = CBigNumBoringSSL_BN_bn2dec(self.ctx?.convert())!
+        defer { CBigNumBoringSSL_OPENSSL_free(cString) }
+        return String(cString: cString)
     }
 
     public var hex: String {
-        return String(validatingUTF8: CBigNumBoringSSL_BN_bn2hex(self.ctx?.convert()))!
+        let cString = CBigNumBoringSSL_BN_bn2hex(self.ctx?.convert())!
+        defer { CBigNumBoringSSL_OPENSSL_free(cString) }
+        return String(cString: cString)
     }
 }
 
