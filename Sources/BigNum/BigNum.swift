@@ -105,11 +105,11 @@ extension BigNum: CustomStringConvertible {
 
 extension BigNum: Comparable {
     public static func == (lhs: BigNum, rhs: BigNum) -> Bool {
-        CBigNumBoringSSL_BN_cmp(lhs.ctx, rhs.ctx) == 0
+        CBigNumBoringSSL_BN_equal_consttime(lhs.ctx, rhs.ctx) == 1
     }
 
     public static func < (lhs: BigNum, rhs: BigNum) -> Bool {
-        CBigNumBoringSSL_BN_cmp(lhs.ctx, rhs.ctx) == -1
+        CBigNumBoringSSL_BN_equal_consttime(lhs.ctx, rhs.ctx) == -1
     }
 }
 
