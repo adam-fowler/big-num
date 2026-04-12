@@ -1,0 +1,11 @@
+diff --git a/Sources/CBigNumBoringSSL/crypto/evp/print.cc b/Sources/CBigNumBoringSSL/crypto/evp/print.cc
+--- a/Sources/CBigNumBoringSSL/crypto/evp/print.cc
++++ b/Sources/CBigNumBoringSSL/crypto/evp/print.cc
+@@ -12,6 +12,7 @@
+ // See the License for the specific language governing permissions and
+ // limitations under the License.
+
++#include <inttypes.h>
+ #include <CBigNumBoringSSL_evp.h>
+
+ #include <CBigNumBoringSSL_bio.h>

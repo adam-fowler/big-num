@@ -1,0 +1,11 @@
+diff --git a/Sources/CBigNumBoringSSL/crypto/x509/t_x509.cc b/Sources/CBigNumBoringSSL/crypto/x509/t_x509.cc
+--- a/Sources/CBigNumBoringSSL/crypto/x509/t_x509.cc
++++ b/Sources/CBigNumBoringSSL/crypto/x509/t_x509.cc
+@@ -13,6 +13,7 @@
+ // limitations under the License.
+
+ #include <assert.h>
++#include <inttypes.h>
+
+ #include <CBigNumBoringSSL_asn1.h>
+ #include <CBigNumBoringSSL_bio.h>

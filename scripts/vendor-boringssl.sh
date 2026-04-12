@@ -38,23 +38,18 @@
 #      a local copy of the BoringSSL sources in Sources/CBigNumBoringSSL.
 #      Any prior contents of Sources/CBigNumBoringSSL will be deleted.
 #
-set -eu
-#set -eou pipefail
+set -eou pipefail
 
 HERE=$(pwd)
 DSTROOT=Sources/CBigNumBoringSSL
-#TMPDIR=$(mktemp -d /tmp/.workingXXXXXX)
-TMPDIR="${HERE}/.boringssl"
+TMPDIR=$(mktemp -d ${HERE}/.boringssl)
 SRCROOT="${TMPDIR}/src/boringssl.googlesource.com/boringssl"
-CROSS_COMPILE_TARGET_LOCATION="/Library/Developer/Destinations"
-CROSS_COMPILE_VERSION="5.5.2"
 
 # This function namespaces the awkward inline functions declared in OpenSSL
 # and BoringSSL.
 function namespace_inlines {
-    echo "NAMESPACE inlines"
     # Pull out all STACK_OF functions.
-    STACKS=$(grep --no-filename -rE -e "DEFINE_(SPECIAL_)?STACK_OF\([A-Z_0-9a-z]+\)" -e "DEFINE_NAMED_STACK_OF\([A-Z_0-9a-z]+, +[A-Z_0-9a-z:]+\)" "$1/crypto/"* | grep -v '//' | grep -v '#' | gsed -e 's/DEFINE_\(SPECIAL_\)\?STACK_OF(\(.*\))/\2/' -e 's/DEFINE_NAMED_STACK_OF(\(.*\), .*)/\1/')
+    STACKS=$(grep --no-filename -rE -e "DEFINE_(SPECIAL_)?STACK_OF\([A-Z_0-9a-z]+\)" -e "DEFINE_NAMED_STACK_OF\([A-Z_0-9a-z]+, +[A-Z_0-9a-z:]+\)" "$1/"* | grep -v '//' | grep -v '#' | $sed -e 's/DEFINE_\(SPECIAL_\)\?STACK_OF(\(.*\))/\2/' -e 's/DEFINE_NAMED_STACK_OF(\(.*\), .*)/\1/')
     STACK_FUNCTIONS=("call_free_func" "call_copy_func" "call_cmp_func" "new" "new_null" "num" "zero" "value" "set" "free" "pop_free" "insert" "delete" "delete_ptr" "find" "shift" "push" "pop" "dup" "sort" "is_sorted" "set_cmp_func" "deep_copy")
 
     for s in $STACKS; do
@@ -64,7 +59,7 @@ function namespace_inlines {
     done
 
     # Now pull out all LHASH_OF functions.
-    LHASHES=$(grep --no-filename -rE "DEFINE_LHASH_OF\([A-Z_0-9a-z]+\)" "$1/crypto/"* | grep -v '//' | grep -v '#' | grep -v '\\$' | gsed 's/DEFINE_LHASH_OF(\(.*\))/\1/')
+    LHASHES=$(grep --no-filename -rE "DEFINE_LHASH_OF\([A-Z_0-9a-z]+\)" "$1/"* | grep -v '//' | grep -v '#' | grep -v '\\$' | $sed 's/DEFINE_LHASH_OF(\(.*\))/\1/')
     LHASH_FUNCTIONS=("call_cmp_func" "call_hash_func" "new" "free" "num_items" "retrieve" "call_cmp_key" "retrieve_key" "insert" "delete" "call_doall" "call_doall_arg" "doall" "doall_arg")
 
     for l in $LHASHES; do
@@ -85,34 +80,51 @@ function mangle_symbols {
 
         export GOPATH="${TMPDIR}"
 
-        # Begin by building for macOS.
-        swift build --product CBigNumBoringSSL --enable-test-discovery
-        go run "${SRCROOT}/util/read_symbols.go" -out "${TMPDIR}/symbols-macOS.txt" "${HERE}/.build/debug/libCBigNumBoringSSL.a"
+        # Begin by building for macOS. We build for two target triples, Intel
+        # and Apple Silicon.
+        swift build --triple "x86_64-apple-macosx" --product CBigNumBoringSSL
+        swift build --triple "arm64-apple-macosx" --product CBigNumBoringSSL
+        (
+            cd "${SRCROOT}"
+            go mod tidy -modcacherw
+            go run "util/read_symbols.go" -out "${TMPDIR}/symbols-macOS-intel.txt" "${HERE}/.build/x86_64-apple-macosx/debug/libCBigNumBoringSSL.a"
+            go run "util/read_symbols.go" -out "${TMPDIR}/symbols-macOS-as.txt" "${HERE}/.build/arm64-apple-macosx/debug/libCBigNumBoringSSL.a"
+        )
 
         # Now build for iOS. We use xcodebuild for this because SwiftPM doesn't
         # meaningfully support it. Unfortunately we must archive ourselves.
-        #xcodebuild -sdk iphoneos -scheme CBigNumBoringSSL -derivedDataPath "${TMPDIR}/iphoneos-deriveddata"
-        #ar -r "${TMPDIR}/libCBigNumBoringSSL-ios.a" "${TMPDIR}/iphoneos-deriveddata/Build/Products/Debug-iphoneos/CBigNumBoringSSL.o"
-        #go run "${SRCROOT}/util/read_symbols.go" -out "${TMPDIR}/symbols-iOS.txt" "${TMPDIR}/libCBigNumBoringSSL-ios.a"
+        #
+        # If xcodebuild complains about not finding the scheme, make sure there
+        # isn't a .xcodeproj kicking around.
+        xcodebuild -sdk iphoneos -scheme CBigNumBoringSSL -derivedDataPath "${TMPDIR}/iphoneos-deriveddata" -destination generic/platform=iOS
+        ar -r "${TMPDIR}/libCBigNumBoringSSL-iosarm64.a" "${TMPDIR}/iphoneos-deriveddata/Build/Products/Debug-iphoneos/CBigNumBoringSSL.o"
+
+        (
+            cd "${SRCROOT}"
+            go run "util/read_symbols.go" -out "${TMPDIR}/symbols-iOS.txt" "${TMPDIR}/libCBigNumBoringSSL-iosarm64.a"
+        )
 
         # Now cross compile for our targets.
-        # If you have trouble with the script around this point, consider
-        # https://github.com/CSCIX65G/SwiftCrossCompilers to obtain cross
-        # compilers for the architectures we care about.
-        for cc_target in "${CROSS_COMPILE_TARGET_LOCATION}"/*"${CROSS_COMPILE_VERSION}"*.json; do
-            echo "Cross compiling for ${cc_target}"
-            swift build --product CBigNumBoringSSL --destination "${cc_target}" --enable-test-discovery
-        done;
+        docker run --rm --privileged -v"$(pwd)":/src -w/src --platform linux/arm64 swift:6.3-noble \
+            swift build --product CBigNumBoringSSL
+        docker run --rm --privileged -v"$(pwd)":/src -w/src --platform linux/amd64 swift:6.3-noble \
+            swift build --product CBigNumBoringSSL
 
         # Now we need to generate symbol mangles for Linux. We can do this in
         # one go for all of them.
-        go run "${SRCROOT}/util/read_symbols.go" -obj-file-format elf -out "${TMPDIR}/symbols-linux-all.txt" "${HERE}"/.build/*-unknown-linux/debug/libCBigNumBoringSSL.a
+        (
+            cd "${SRCROOT}"
+            go run "util/read_symbols.go" -obj-file-format elf -out "${TMPDIR}/symbols-linux-all.txt" "${HERE}"/.build/*-unknown-linux-gnu/debug/libCBigNumBoringSSL.a
+        )
 
         # Now we concatenate all the symbols together and uniquify it.
         cat "${TMPDIR}"/symbols-*.txt | sort | uniq > "${TMPDIR}/symbols.txt"
 
         # Use this as the input to the mangle.
-        go run "${SRCROOT}/util/make_prefix_headers.go" -out "${HERE}/${DSTROOT}/include/openssl" "${TMPDIR}/symbols.txt"
+        (
+            cd "${SRCROOT}"
+            go run "util/make_prefix_headers.go" -out "${HERE}/${DSTROOT}/include/openssl" "${TMPDIR}/symbols.txt"
+        )
 
         # Remove the product, as we no longer need it.
         $sed -i -e 's/MANGLE_START\*\//MANGLE_START/' -e 's/\/\*MANGLE_END/MANGLE_END/' "${HERE}/Package.swift"
@@ -124,12 +136,51 @@ function mangle_symbols {
     # Now edit the headers again to add the symbol mangling.
     echo "ADDING symbol mangling"
     perl -pi -e '$_ .= qq(\n#define BORINGSSL_PREFIX CBigNumBoringSSL\n) if /#define OPENSSL_HEADER_BASE_H/' "$DSTROOT/include/openssl/base.h"
-    echo "ASSEMBLY"
-    for assembly_file in $(find "$DSTROOT" -name "*.S")
+
+    while IFS= read -r -d '' assembly_file
     do
         $sed -i '1 i #define BORINGSSL_PREFIX CBigNumBoringSSL' "$assembly_file"
-    done
+    done <   <(find "$DSTROOT" -name "*.S" -print0)
     namespace_inlines "$DSTROOT"
+}
+
+
+# BoringSSL includes a few non-namespaced C++ structures. These aren't namespaced because they're exposed
+# in C-land, which doesn't know about the namespacing. Sadly, these structures include constructors and destructors,
+# and if those aren't namespaced we're still able to conflict.
+#
+# This function is responsible for identifying them and manually cleaning them up. We run this only on
+# macOS because we don't believe that the cross-platform architectures will hit any other structures.
+function mangle_cpp_structures {
+    echo "MANGLING C++ structures"
+    (
+        # We need a .a: may as well get SwiftPM to give it to us.
+        # Temporarily enable the product we need.
+        $sed -i -e 's/MANGLE_START/MANGLE_START*\//' -e 's/MANGLE_END/\/*MANGLE_END/' "${HERE}/Package.swift"
+
+        # Build for macOS.
+        swift build --product CBigNumBoringSSL
+
+        # Woah, this is a hell of a command! What does it do?
+        #
+        # The nm command grabs all global defined symbols. We then run the C++ demangler over them and look for methods with '::' in them:
+        # these are C++ methods. We then exclude any that contain CBigNumBoringSSL (as those are already namespaced!) and any that contain swift
+        # (as those were put there by the Swift runtime, not us). This gives us a list of symbols. The following cut command
+        # grabs the type name from each of those (the bit preceding the '::'). Then, we sort and uniqify that list.
+        # Finally, we remove any symbol that ends in std. This gives us all the structures that need to be renamed.
+        # The final `grep -v "std$" || true` is tolerant: if every remaining
+        # symbol is in the std:: namespace (as happens when BoringSSL's own
+        # prefixing has already covered all project-owned C++ symbols), the
+        # grep matches nothing and would otherwise exit 1 under pipefail.
+        structures=$(nm -gUj "$(swift build --show-bin-path)/libCBigNumBoringSSL.a" | c++filt | grep "::" | grep -v -e "CBigNumBoringSSL" -e "swift" | cut -d : -f1 | { grep -v "std$" || true; } | $sed -E -e 's/([^<>]*)(<[^<>]*>)?/\1/' | sort | uniq)
+
+        for struct in ${structures}; do
+            echo "#define ${struct} BORINGSSL_ADD_PREFIX(BORINGSSL_PREFIX, ${struct})" >> "${DSTROOT}/include/CBigNumBoringSSL_boringssl_prefix_symbols.h"
+        done
+
+        # Remove the product, as we no longer need it.
+        $sed -i -e 's/MANGLE_START\*\//MANGLE_START/' -e 's/\/\*MANGLE_END/MANGLE_END/' "${HERE}/Package.swift"
+    )
 }
 
 case "$(uname -s)" in
@@ -137,6 +188,7 @@ case "$(uname -s)" in
         sed=gsed
         ;;
     *)
+        # shellcheck disable=SC2209
         sed=sed
         ;;
 esac
@@ -148,34 +200,30 @@ if ! hash ${sed} 2>/dev/null; then
     exit 43
 fi
 
-CLONE_LATEST=""
-KEEP_TEMP_FOLDER=""
-
-while getopts 'uk:' option
-do
-    case $option in
-        c) CLONE_LATEST=1 ;;
-        k) KEEP_TEMP_FOLDER=1 ;;
-    esac
-done
-
 echo "REMOVING any previously-vendored BoringSSL code"
 rm -rf $DSTROOT/include
 rm -rf $DSTROOT/ssl
 rm -rf $DSTROOT/crypto
 rm -rf $DSTROOT/third_party
-rm -rf $DSTROOT/err_data.c
+rm -rf $DSTROOT/gen
 
-if [ -n "$CLONE_LATEST" ]; then
-    echo "CLONING boringssl"
-    mkdir -p "$SRCROOT"
-    git clone https://boringssl.googlesource.com/boringssl "$SRCROOT"
-fi
-
+echo "CLONING boringssl"
+mkdir -p "$SRCROOT"
+git clone --depth 1 --branch 0.20260327.0 https://boringssl.googlesource.com/boringssl "$SRCROOT"
 cd "$SRCROOT"
 BORINGSSL_REVISION=$(git rev-parse HEAD)
 cd "$HERE"
 echo "CLONED boringssl@${BORINGSSL_REVISION}"
+
+# BoringSSL removed util/read_symbols.go and util/make_prefix_headers.go in early
+# 2026 (commits b523a5f5 and 1842c3eb) when they integrated symbol prefixing into
+# CMake via audit_symbols.go + delocate. Our mangling pipeline still relies on
+# the old helpers, so we vendor them from commit 817ab07 (the last commit where
+# both files existed, matching what swift-nio-ssl is pinned to) under
+# scripts/vendored-util/ and restore them into the clone before use.
+echo "RESTORING vendored util scripts (removed from BoringSSL upstream)"
+cp "${HERE}/scripts/vendored-util/read_symbols.go" "${SRCROOT}/util/read_symbols.go"
+cp "${HERE}/scripts/vendored-util/make_prefix_headers.go" "${SRCROOT}/util/make_prefix_headers.go"
 
 echo "OBTAINING submodules"
 (
@@ -188,76 +236,44 @@ echo "GENERATING assembly helpers"
     cd "$SRCROOT"
     cd ..
     mkdir -p "${SRCROOT}/crypto/third_party/sike/asm"
-    python "${HERE}/scripts/build-asm.py"
+    python3 "${HERE}/scripts/build-asm.py"
 )
 
 PATTERNS=(
-'include/openssl/aead.h'
-'include/openssl/aes.h'
-'include/openssl/arm_arch.h'
-'include/openssl/asn1.h'
-'include/openssl/base.h'
-'include/openssl/bio.h'
-'include/openssl/bn.h'
-'include/openssl/buf.h'
-'include/openssl/buffer.h'
-'include/openssl/bytestring.h'
-'include/openssl/chacha.h'
-'include/openssl/cipher.h'
-'include/openssl/cpu.h'
-'include/openssl/crypto.h'
-'include/openssl/err.h'
-'include/openssl/ex_data.h'
-'include/openssl/is_boringssl.h'
-'include/openssl/opensslconf.h'
-'include/openssl/mem.h'
-'include/openssl/nid.h'
-'include/openssl/rand.h'
-'include/openssl/sha.h'
-'include/openssl/span.h'
-'include/openssl/stack.h'
-'include/openssl/thread.h'
-'include/openssl/type_check.h'
+'include/openssl/*.h'
+'include/openssl/*/*.h'
 'crypto/*.h'
-'crypto/*.c'
-'crypto/bio/bio.c'
-'crypto/bio/file.c'
-'crypto/bn_extra/convert.c'
-'crypto/bytestring/*.h'
-'crypto/bytestring/*.c'
-'crypto/err/*.c'
-'crypto/err/*.h'
-'crypto/fipsmodule/*.h'
-'crypto/fipsmodule/*.S'
-'crypto/fipsmodule/bn/*.h'
-'crypto/fipsmodule/bn/*.c'
-'crypto/fipsmodule/bn/*/*.c'
-'crypto/fipsmodule/aes/*.h'
-'crypto/fipsmodule/aes/*.c'
-'crypto/fipsmodule/cipher/*.h'
-'crypto/fipsmodule/cipher/cipher.c'
-'crypto/fipsmodule/cipher/e_aes.c'
-'crypto/fipsmodule/modes/*.h'
-'crypto/fipsmodule/modes/*.c'
-'crypto/fipsmodule/rand/*.h'
-'crypto/fipsmodule/rand/*.c'
-'crypto/rand_extra/*.c'
-'crypto/stack/*.c'
+'crypto/*.cc'
+'crypto/*/*.h'
+'crypto/*/*.cc'
+'crypto/*/*.S'
+'crypto/*/*/*.h'
+'crypto/*/*/*.cc'
+'crypto/*/*/*.cc.inc'
+'crypto/*/*/*.inc'
+'crypto/*/*/*.S'
+'crypto/*/*/*/*.cc.inc'
+'crypto/*/*/*/*.inc'
+'gen/crypto/*.cc'
+'gen/crypto/*.S'
+'gen/bcm/*.S'
 'third_party/fiat/*.h'
+'third_party/fiat/*.c.inc'
+'third_party/fiat/asm/*.S'
 )
 
 EXCLUDES=(
 '*_test.*'
 'test_*.*'
 'test'
-'example_*.c'
+'example_*.cc'
 )
 
 echo "COPYING boringssl"
 for pattern in "${PATTERNS[@]}"
 do
   for i in $SRCROOT/$pattern; do
-    path=${i#$SRCROOT}
+    path=${i#"$SRCROOT"}
     dest="$DSTROOT$path"
     dest_dir=$(dirname "$dest")
     mkdir -p "$dest_dir"
@@ -271,28 +287,11 @@ do
   find $DSTROOT -d -name "$exclude" -exec rm -rf {} \;
 done
 
-echo "GENERATING err_data.c"
-(
-    cd "$SRCROOT/crypto/err"
-    go run err_data_generate.go > "${HERE}/${DSTROOT}/crypto/err/err_data.c"
-)
-
-echo "DELETING crypto/fipsmodule/bcm.c"
-rm -f $DSTROOT/crypto/fipsmodule/bcm.c
-
-#echo "FIXING missing include"
-#perl -pi -e '$_ .= qq(\n#include <openssl/cpu.h>\n) if /#include <openssl\/err.h>/' "$DSTROOT/crypto/fipsmodule/ec/p256-x86_64.c"
-
 mangle_symbols
-
-echo "MANGLE done"
-# Removing ASM on 32 bit Apple platforms
-echo "REMOVING assembly on 32-bit Apple platforms"
-gsed -i "/#define OPENSSL_HEADER_BASE_H/a#if defined(__APPLE__) && defined(__i386__)\n#define OPENSSL_NO_ASM\n#endif" "$DSTROOT/include/openssl/base.h"
 
 echo "RENAMING header files"
 (
-    # We need to rearrange a coouple of things here, the end state will be:
+    # We need to rearrange a couple of things here, the end state will be:
     # - Headers from 'include/openssl/' will be moved up a level to 'include/'
     # - Their names will be prefixed with 'CBigNumBoringSSL_'
     # - The headers prefixed with 'boringssl_prefix_symbols' will also be prefixed with 'CBigNumBoringSSL_'
@@ -303,28 +302,47 @@ echo "RENAMING header files"
     mv include/openssl/* include/
     rmdir "include/openssl"
 
+    # Now let's remove the pki subdirectory, as we don't need it.
+    rm -rf include/pki
+
     # Now change the imports from "<openssl/X> to "<CBigNumBoringSSL_X>", apply the same prefix to the 'boringssl_prefix_symbols' headers.
-    find . -name "*.[ch]" -or -name "*.cc" -or -name "*.S" | xargs $sed -i -e 's+include <openssl/+include <CBigNumBoringSSL_+' -e 's+include <boringssl_prefix_symbols+include <CBigNumBoringSSL_boringssl_prefix_symbols+'
+    # shellcheck disable=SC2038
+    find . -name "*.[ch]" -or -name "*.cc" -or -name "*.S" -or -name "*.cc.inc" -or -name "*.c.inc" | xargs $sed -i -r -e 's#include <openssl/(([^/>]+/)*)(.+.h)>#include <\1CBigNumBoringSSL_\3>#' -e 's+include <boringssl_prefix_symbols+include <CBigNumBoringSSL_boringssl_prefix_symbols+' -e 's#include "openssl/(([^/>]+/)*)(.+.h)"#include "\1CBigNumBoringSSL_\3"#'
 
     # Okay now we need to rename the headers adding the prefix "CBigNumBoringSSL_".
     pushd include
-    find . -name "*.h" | $sed -e "s_./__" | xargs -I {} mv {} CBigNumBoringSSL_{}
+    # nullglob so the second loop is a no-op when there are no subdirectories
+    # (current BoringSSL layout has no subdirs under include/openssl/ by the
+    # time we get here, but older layouts did). Kept for forward-compat.
+    shopt -s nullglob
+    for x in *.h; do mv -- "$x" "CBigNumBoringSSL_${x}"; done
+    for x in **/*.h; do mv -- "$x" "${x%/*}/CBigNumBoringSSL_${x##*/}"; done
+    shopt -u nullglob
+
     # Finally, make sure we refer to them by their prefixed names, and change any includes from angle brackets to quotation marks.
-    find . -name "*.h" | xargs $sed -i -e 's/include "/include "CBigNumBoringSSL_/' -e 's/include <CBigNumBoringSSL_\(.*\)>/include "CBigNumBoringSSL_\1"/'
+    # shellcheck disable=SC2038
+    find . -name "*.h" | xargs $sed -i -r -e 's#include "(([^/"]+/)*)(.+.h)"#include "\1CBigNumBoringSSL_\3"#' -e 's/include <CBigNumBoringSSL_(.*)>/include "CBigNumBoringSSL_\1"/'
     popd
 )
+
+echo "PATCHING BoringSSL"
+git apply "${HERE}/scripts/patch-1-inttypes.patch"
+git apply "${HERE}/scripts/patch-2-inttypes.patch"
+git apply "${HERE}/scripts/patch-3-more-inttypes.patch"
 
 # We need to avoid having the stack be executable. BoringSSL does this in its build system, but we can't.
 echo "PROTECTING against executable stacks"
 (
     cd "$DSTROOT"
+    # shellcheck disable=SC2038
     find . -name "*.S" | xargs $sed -i '$ a #if defined(__linux__) && defined(__ELF__)\n.section .note.GNU-stack,"",%progbits\n#endif\n'
 )
 
-echo "PATCHING BoringSSL"
-git apply "${HERE}/scripts/patch-1-inttypes.patch"
-git apply "${HERE}/scripts/patch-2-arm-arch.patch"
-#git apply "${HERE}/scripts/patch-3-weak-linking.patch"
+mangle_cpp_structures
+
+# Removing ASM on 32 bit Apple platforms
+echo "REMOVING assembly on 32-bit Apple platforms"
+$sed -i "/#define OPENSSL_HEADER_BASE_H/a#if defined(__APPLE__) && defined(__i386__)\n#define OPENSSL_NO_ASM\n#endif" "$DSTROOT/include/CBigNumBoringSSL_base.h"
 
 # We need BoringSSL to be modularised
 echo "MODULARISING BoringSSL"
@@ -342,8 +360,13 @@ cat << EOF > "$DSTROOT/include/CBigNumBoringSSL.h"
 #include "CBigNumBoringSSL_err.h"
 #include "CBigNumBoringSSL_rand.h"
 
-
 #endif  // C_BIGNUM_BORINGSSL_H
+EOF
+cat << EOF > "$DSTROOT/include/module.modulemap"
+module CBigNumBoringSSL {
+    umbrella header "CBigNumBoringSSL.h"
+    export *
+}
 EOF
 
 echo "RECORDING BoringSSL revision"
@@ -351,7 +374,4 @@ $sed -i -e "s/BoringSSL Commit: [0-9a-f]\+/BoringSSL Commit: ${BORINGSSL_REVISIO
 echo "This directory is derived from BoringSSL cloned from https://boringssl.googlesource.com/boringssl at revision ${BORINGSSL_REVISION}" > "$DSTROOT/hash.txt"
 
 echo "CLEANING temporary directory"
-
-if [ -z "$KEEP_TEMP_FOLDER" ]; then
-    rm -rf "${TMPDIR}"
-fi
+rm -rf "${TMPDIR}"

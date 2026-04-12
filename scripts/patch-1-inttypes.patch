@@ -1,14 +1,23 @@
+diff --git a/Sources/CBigNumBoringSSL/crypto/hrss/hrss.cc b/Sources/CBigNumBoringSSL/crypto/hrss/hrss.cc
+--- a/Sources/CBigNumBoringSSL/crypto/hrss/hrss.cc
++++ b/Sources/CBigNumBoringSSL/crypto/hrss/hrss.cc
+@@ -13,6 +13,7 @@
+ // limitations under the License.
+
+ #include <CBigNumBoringSSL_hrss.h>
++#include <inttypes.h>
+
+ #include <assert.h>
+ #include <stdio.h>
 diff --git a/Sources/CBigNumBoringSSL/include/CBigNumBoringSSL_bn.h b/Sources/CBigNumBoringSSL/include/CBigNumBoringSSL_bn.h
-index c86c1ef..7013140 100644
 --- a/Sources/CBigNumBoringSSL/include/CBigNumBoringSSL_bn.h
 +++ b/Sources/CBigNumBoringSSL/include/CBigNumBoringSSL_bn.h
-@@ -126,7 +126,7 @@
- #include "CBigNumBoringSSL_base.h"
- #include "CBigNumBoringSSL_thread.h"
+@@ -18,7 +18,7 @@
+
+ #include "CBigNumBoringSSL_base.h"   // IWYU pragma: export
 
 -#include <inttypes.h>  // for PRIu64 and friends
 +#include <sys/types.h>
  #include <stdio.h>  // for FILE*
 
  #if defined(__cplusplus)
- 
