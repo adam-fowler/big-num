@@ -1,0 +1,4 @@
+module CBigNumBoringSSL {
+    umbrella header "CBigNumBoringSSL.h"
+    export *
+}
