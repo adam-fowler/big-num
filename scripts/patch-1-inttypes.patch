@@ -1,14 +1,25 @@
+diff --git a/Sources/CBigNumBoringSSL/crypto/x509/t_x509.cc b/Sources/CBigNumBoringSSL/crypto/x509/t_x509.cc
+index d2a1ddc8..6f8be6c2 100644
+--- a/Sources/CBigNumBoringSSL/crypto/x509/t_x509.cc
++++ b/Sources/CBigNumBoringSSL/crypto/x509/t_x509.cc
+@@ -13,6 +13,7 @@
+ // limitations under the License.
+ 
+ #include <assert.h>
++#include <inttypes.h>  // for PRIu64 and friends
+ 
+ #include <CBigNumBoringSSL_asn1.h>
+ #include <CBigNumBoringSSL_bio.h>
 diff --git a/Sources/CBigNumBoringSSL/include/CBigNumBoringSSL_bn.h b/Sources/CBigNumBoringSSL/include/CBigNumBoringSSL_bn.h
-index c86c1ef..7013140 100644
+index 5eadecad..b5a16586 100644
 --- a/Sources/CBigNumBoringSSL/include/CBigNumBoringSSL_bn.h
 +++ b/Sources/CBigNumBoringSSL/include/CBigNumBoringSSL_bn.h
-@@ -126,7 +126,7 @@
- #include "CBigNumBoringSSL_base.h"
- #include "CBigNumBoringSSL_thread.h"
-
--#include <inttypes.h>  // for PRIu64 and friends
-+#include <sys/types.h>
- #include <stdio.h>  // for FILE*
-
- #if defined(__cplusplus)
+@@ -18,7 +18,6 @@
  
+ #include "CBigNumBoringSSL_base.h"   // IWYU pragma: export
+ 
+-#include <inttypes.h>  // for PRIu64 and friends
+ #include <stdio.h>  // for FILE*
+ 
+ #if defined(__cplusplus)
+

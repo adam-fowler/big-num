@@ -1,0 +1,26 @@
+diff --git a/Sources/CBigNumBoringSSL/crypto/fipsmodule/service_indicator/internal.h b/Sources/CBigNumBoringSSL/crypto/fipsmodule/service_indicator/internal.h
+index c5a8113..27f8060 100644
+--- a/Sources/CBigNumBoringSSL/crypto/fipsmodule/service_indicator/internal.h
++++ b/Sources/CBigNumBoringSSL/crypto/fipsmodule/service_indicator/internal.h
+@@ -20,6 +20,10 @@
+ 
+ BSSL_NAMESPACE_BEGIN
+ 
++#if defined(__cplusplus)
++extern "C" {
++#endif
++
+ // FIPS_service_indicator_before_call and |FIPS_service_indicator_after_call|
+ // both currently return the same local thread counter which is slowly
+ // incremented whenever approved services are called. The
+@@ -39,6 +43,10 @@ BSSL_NAMESPACE_BEGIN
+ OPENSSL_EXPORT uint64_t FIPS_service_indicator_before_call();
+ OPENSSL_EXPORT uint64_t FIPS_service_indicator_after_call();
+ 
++#if defined(__cplusplus)
++}
++#endif
++
+ #if defined(BORINGSSL_FIPS)
+ 
+ // FIPS_service_indicator_update_state records that an approved service has been

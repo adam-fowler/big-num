@@ -19,6 +19,7 @@
   "respectsExistingLineBreaks" : true,
   "prioritizeKeepingFunctionOutputTogether" : true,
   "multiElementCollectionTrailingCommas" : true,
+  "multilineTrailingCommaBehavior": true,
   "rules" : {
     "AllPublicDeclarationsHaveDocumentation" : false,
     "AlwaysUseLiteralForEmptyCollectionInit" : false,
