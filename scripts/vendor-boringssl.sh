@@ -212,6 +212,16 @@ else
 fi
 cd "$HERE"
 
+# BoringSSL removed util/read_symbols.go and util/make_prefix_headers.go in early
+# 2026 (commits b523a5f5 and 1842c3eb) when they integrated symbol prefixing into
+# CMake via audit_symbols.go + delocate. Our mangling pipeline still relies on
+# the old helpers, so we vendor them from commit 817ab07 (the last commit where
+# both files existed, matching what swift-nio-ssl is pinned to) under
+# scripts/vendored-util/ and restore them into the clone before use.
+echo "RESTORING vendored util scripts (removed from BoringSSL upstream)"
+cp "${HERE}/scripts/vendored-util/read_symbols.go" "${SRCROOT}/util/read_symbols.go"
+cp "${HERE}/scripts/vendored-util/make_prefix_headers.go" "${SRCROOT}/util/make_prefix_headers.go"
+
 echo "OBTAINING submodules"
 (
     cd "$SRCROOT"
